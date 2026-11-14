@@ -4,6 +4,8 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { viteSingleFile } from 'vite-plugin-singlefile';
 
 export default defineConfig(({ mode }) => ({
+  // En GitHub Pages la app vive en /<repositorio>/
+  base: process.env.BASE_PATH ?? '/',
   plugins: [
     react(),
     mode === 'single'
@@ -19,7 +21,8 @@ export default defineConfig(({ mode }) => ({
             theme_color: '#0f766e',
             background_color: '#f6f7f9',
             display: 'standalone',
-            start_url: '/',
+            start_url: './',
+            scope: './',
             icons: [
               { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
               { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },

@@ -64,6 +64,8 @@ export interface Rate extends Base {
 export interface Setting {
   key: string;
   value: unknown;
+  /** Hora de la última edición (ms). Las claves que empiezan con "_" no se sincronizan. */
+  updatedAt?: number;
 }
 
 export const db = new Dexie('mis-finanzas') as Dexie & {
@@ -119,5 +121,9 @@ export async function getSetting<T>(key: string, fallback: T): Promise<T> {
 }
 
 export async function setSetting(key: string, value: unknown) {
-  await db.settings.put({ key, value });
+  await db.settings.put({ key, value, updatedAt: Date.now() });
 }
+
+/** Tablas que se sincronizan con la nube */
+export const SYNC_TABLES = ['accounts', 'categories', 'transactions', 'budgets', 'rates', 'settings'] as const;
+export type SyncTable = (typeof SYNC_TABLES)[number];

@@ -1,6 +1,6 @@
 # Mis Finanzas
 
-App de finanzas personales en lempiras y dólares. Funciona en la computadora y se instala en Android como app (PWA). Los datos se guardan en el dispositivo y funcionan sin internet. La sincronización entre dispositivos llega en la siguiente versión.
+App de finanzas personales en lempiras y dólares. Funciona en la computadora y se instala en Android como app (PWA). Los datos se guardan en el dispositivo, funcionan sin internet y se sincronizan entre dispositivos con Supabase.
 
 ## Qué incluye la versión 1
 
@@ -23,10 +23,23 @@ npm run dev        # abre http://localhost:5173
 npm run build      # genera la app lista para publicar en dist/
 ```
 
+## Sincronización (Supabase)
+
+1. Crea un proyecto en [Supabase](https://supabase.com) y ejecuta `supabase/schema.sql` en el SQL Editor.
+2. Copia `.env.example` como `.env.production` con tu Project URL y anon key.
+3. En Authentication → URL Configuration pon como *Site URL* la dirección donde publicas la app.
+
+Todos los datos van en una sola tabla `records` protegida con RLS: cada usuario solo ve lo suyo. Si un registro se edita en dos dispositivos, gana la edición más reciente.
+
+## Publicación
+
+`.github/workflows/deploy.yml` compila y publica en GitHub Pages en cada push a `main`. Activa Pages en Settings → Pages → Source: GitHub Actions.
+
 ## Estructura
 
 - `src/db.ts`: base de datos local (Dexie / IndexedDB) y tipos.
 - `src/data.ts`: saldos, totales y conversiones.
+- `src/cloud.ts`: inicio de sesión y sincronización con Supabase.
 - `src/money.ts`, `src/dates.ts`: formato de montos, quincenas y meses.
 - `src/pages/`: Inicio, Movimientos, Cuentas, Presupuestos, Más.
 - `src/components/`: formulario de movimientos y piezas comunes.

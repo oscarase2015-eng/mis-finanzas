@@ -7,6 +7,10 @@ import Budgets from './pages/Budgets';
 import More from './pages/More';
 import TxForm from './components/TxForm';
 import type { Transaction } from './db';
+import type { Session } from '@supabase/supabase-js';
+import { startCloud, supabase } from './cloud';
+import { LoginScreen, NewPasswordModal, syncLabel, useSyncState } from './components/Auth';
+import { remember } from './theme';
 
 export type Page = 'inicio' | 'movimientos' | 'cuentas' | 'presupuestos' | 'mas';
 
@@ -50,6 +54,23 @@ export default function App() {
   const store = useStore();
   const [route, setRoute] = useState(readHash);
   const [txModal, setTxModal] = useState<{ tx?: Transaction; preset?: Partial<Transaction> } | null>(null);
+  const [session, setSession] = useState<Session | null | undefined>(supabase ? undefined : null);
+  const [skipLogin, setSkipLogin] = useState(() => remember('skipLogin') === '1');
+  const [recovery, setRecovery] = useState(false);
+  const sync = useSyncState();
+
+  useEffect(() => {
+    startCloud(
+      (s) => {
+        setSession(s);
+        if (s) {
+          remember('skipLogin', '0');
+          setSkipLogin(false);
+        }
+      },
+      () => setRecovery(true),
+    );
+  }, []);
 
   useEffect(() => {
     const on = () => setRoute(readHash());
@@ -66,7 +87,8 @@ export default function App() {
     editTx: (tx) => setTxModal({ tx }),
   };
 
-  if (!store.ready) return <div className="loading">Cargando…</div>;
+  if (!store.ready || session === undefined) return <div className="loading">Cargando…</div>;
+  if (supabase && !session && !skipLogin) return <LoginScreen onSkip={() => setSkipLogin(true)} />;
 
   return (
     <div className="shell">
@@ -89,6 +111,11 @@ export default function App() {
             {n.label}
           </button>
         ))}
+        {session && (
+          <p className={`side-sync small ${sync.status}`}>
+            <span className={`sync-dot ${sync.status}`} /> {syncLabel(sync)}
+          </p>
+        )}
       </nav>
 
       <main className="content">
@@ -96,7 +123,16 @@ export default function App() {
         {route.page === 'movimientos' && <Transactions s={store} nav={nav} accountFilter={route.account} />}
         {route.page === 'cuentas' && <Accounts s={store} nav={nav} />}
         {route.page === 'presupuestos' && <Budgets s={store} />}
-        {route.page === 'mas' && <More s={store} />}
+        {route.page === 'mas' && (
+          <More
+            s={store}
+            email={session?.user.email ?? null}
+            onLogin={() => {
+              remember('skipLogin', '0');
+              setSkipLogin(false);
+            }}
+          />
+        )}
       </main>
 
       <button className="fab" aria-label="Nuevo movimiento" onClick={() => nav.newTx()}>
@@ -112,6 +148,7 @@ export default function App() {
         ))}
       </nav>
 
+      {recovery && <NewPasswordModal onClose={() => setRecovery(false)} />}
       {txModal && <TxForm s={store} tx={txModal.tx} preset={txModal.preset} onClose={() => setTxModal(null)} />}
     </div>
   );

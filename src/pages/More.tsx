@@ -6,6 +6,7 @@ import { CURRENCY_NAME } from '../money';
 import { PALETTE } from '../seed';
 import { applyTheme, getTheme, type Theme } from '../theme';
 import { Field, Modal, Segmented } from '../components/ui';
+import { AccountCard } from '../components/Auth';
 
 const SOON = [
   ['🎯', 'Metas de ahorro'],
@@ -13,13 +14,13 @@ const SOON = [
   ['📈', 'Inversiones'],
   ['🔁', 'Pagos recurrentes y recordatorios'],
   ['📊', 'Reportes y exportar a Excel'],
-  ['☁️', 'Sincronización PC ↔ teléfono'],
 ];
 
-export default function More({ s }: { s: Store }) {
+export default function More({ s, email, onLogin }: { s: Store; email: string | null; onLogin: () => void }) {
   return (
     <div className="page">
       <h1>Más</h1>
+      <AccountCard email={email} onLogin={onLogin} />
       <RateCard s={s} />
       <SettingsCard s={s} />
       <CategoriesCard s={s} />
@@ -35,7 +36,7 @@ export default function More({ s }: { s: Store }) {
           ))}
         </ul>
       </section>
-      <p className="muted small center">Mis Finanzas · versión 1 · tus datos se guardan en este dispositivo</p>
+      <p className="muted small center">Mis Finanzas · versión 1.1</p>
     </div>
   );
 }
@@ -297,7 +298,7 @@ function BackupCard() {
   return (
     <section className="card">
       <h3>Respaldo</h3>
-      <p className="muted small">Mientras no haya sincronización, descarga un respaldo de vez en cuando. También sirve para pasar tus datos a otro dispositivo.</p>
+      <p className="muted small">Con la sincronización tus datos ya están en la nube. Este respaldo es una copia extra que puedes guardar donde quieras.</p>
       <div className="row wrap">
         <button className="btn" onClick={exportAll}>
           Descargar respaldo
