@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, type Account, type Budget, type Category, type Currency, type Rate, type Transaction } from './db';
+import { db, type Account, type Budget, type Category, type Currency, type Debt, type DebtPayment, type Goal, type GoalContribution, type Rate, type Transaction } from './db';
 import { convert } from './money';
 
 export interface Store {
@@ -14,10 +14,20 @@ export interface Store {
   catById: Map<string, Category>;
   accById: Map<string, Account>;
   balances: Map<string, number>;
+  debts: Debt[];
+  debtPayments: DebtPayment[];
+  goals: Goal[];
+  goalContributions: GoalContribution[];
 }
 
 export function useStore(): Store {
   const data = useLiveQuery(async () => {
+    const [debts, debtPayments, goals, goalContributions] = await Promise.all([
+      db.debts.where('deleted').equals(0).toArray(),
+      db.debtPayments.where('deleted').equals(0).toArray(),
+      db.goals.where('deleted').equals(0).toArray(),
+      db.goalContributions.where('deleted').equals(0).toArray(),
+    ]);
     const [accounts, categories, txs, budgets, rates, mainS] = await Promise.all([
       db.accounts.where('deleted').equals(0).toArray(),
       db.categories.where('deleted').equals(0).toArray(),
@@ -26,7 +36,7 @@ export function useStore(): Store {
       db.rates.where('deleted').equals(0).toArray(),
       db.settings.get('mainCurrency'),
     ]);
-    return { accounts, categories, txs, budgets, rates, main: (mainS?.value as Currency) ?? 'HNL' };
+    return { accounts, categories, txs, budgets, rates, main: (mainS?.value as Currency) ?? 'HNL', debts, debtPayments, goals, goalContributions };
   }, []);
 
   const accounts = data?.accounts ?? [];
@@ -56,7 +66,58 @@ export function useStore(): Store {
     catById: new Map(categories.map((c) => [c.id, c])),
     accById: new Map(accounts.map((a) => [a.id, a])),
     balances,
+    debts: (data?.debts ?? []).sort((a, b) => a.name.localeCompare(b.name, 'es')),
+    debtPayments: (data?.debtPayments ?? []).sort((a, b) => (a.date === b.date ? b.createdAt - a.createdAt : a.date < b.date ? 1 : -1)),
+    goals: (data?.goals ?? []).sort((a, b) => a.createdAt - b.createdAt),
+    goalContributions: (data?.goalContributions ?? []).sort((a, b) => (a.date === b.date ? b.createdAt - a.createdAt : a.date < b.date ? 1 : -1)),
   };
+}
+
+/** Abonado, pendiente y progreso de una deuda */
+export function debtStatus(s: Store, d: Debt) {
+  const payments = s.debtPayments.filter((p) => p.debtId === d.id);
+  const paid = payments.reduce((a, p) => a + p.amount, 0);
+  const left = Math.max(0, d.total - paid);
+  return { payments, paid, left, ratio: d.total ? Math.min(1, paid / d.total) : 0, done: d.total > 0 && paid >= d.total, last: payments[0] };
+}
+
+/** Ahorrado, faltante y ritmo de un objetivo */
+export function goalStatus(s: Store, g: Goal, todayStr: string) {
+  const contribs = s.goalContributions.filter((c) => c.goalId === g.id);
+  const saved = contribs.reduce((a, c) => a + c.amount, 0);
+  const left = Math.max(0, g.target - saved);
+  // Promedio mensual de los últimos 90 días
+  const t = new Date(todayStr + 'T00:00:00');
+  const from = new Date(t);
+  from.setDate(from.getDate() - 90);
+  const fromStr = from.toISOString().slice(0, 10);
+  const regular = contribs.filter((c) => !c.initial);
+  const recent = regular.filter((c) => c.date > fromStr).reduce((a, c) => a + c.amount, 0);
+  const firstDate = regular.length ? regular[regular.length - 1].date : todayStr;
+  const daysSpan = Math.max(30, Math.min(90, (t.getTime() - new Date(firstDate + 'T00:00:00').getTime()) / 864e5));
+  const perMonth = Math.round((recent / daysSpan) * 30.4);
+  let monthsLeft: number | null = null;
+  let neededPerMonth: number | null = null;
+  if (g.targetDate && left > 0) {
+    const end = new Date(g.targetDate + 'T00:00:00');
+    monthsLeft = Math.max(0, (end.getTime() - t.getTime()) / (864e5 * 30.4));
+    neededPerMonth = monthsLeft > 0 ? Math.ceil(left / monthsLeft) : left;
+  }
+  const etaMonths = perMonth > 0 && left > 0 ? left / perMonth : null;
+  return { contribs, saved, left, ratio: g.target ? Math.max(0, Math.min(1, saved / g.target)) : 0, done: g.target > 0 && saved >= g.target, perMonth, monthsLeft, neededPerMonth, etaMonths };
+}
+
+/** Total pendiente de deudas, convertido a la moneda principal */
+export function debtTotals(s: Store, to: Currency = s.main) {
+  let owe = 0;
+  let owed = 0;
+  for (const d of s.debts) {
+    const { left } = debtStatus(s, d);
+    const v = convert(left, d.currency, to, s.rate) ?? 0;
+    if (d.direction === 'debo') owe += v;
+    else owed += v;
+  }
+  return { owe, owed };
 }
 
 /** Categoría raíz (padre) de una categoría */

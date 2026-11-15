@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { Nav } from '../App';
 import { catBudgetSpent } from './Budgets';
-import { expenseByRoot, netWorth, totals, type Store } from '../data';
+import { debtStatus, debtTotals, expenseByRoot, goalStatus, netWorth, totals, type Store } from '../data';
 import { addMonths, monthLabel, monthOf, quincenaOf, today, type Period } from '../dates';
 import { fmt, fmtShort } from '../money';
 import { Empty, PeriodNav, Progress, RateWarning } from '../components/ui';
@@ -32,6 +32,15 @@ export default function Dashboard({ s, nav }: { s: Store; nav: Nav }) {
     .slice(0, 4);
 
   const recent = s.txs.slice(0, 6);
+  const dt = debtTotals(s);
+  const debtRows = s.debts
+    .map((d) => ({ d, st: debtStatus(s, d) }))
+    .filter((r) => !r.st.done)
+    .slice(0, 4);
+  const goalRows = s.goals
+    .filter((g) => !g.archived)
+    .map((g) => ({ g, st: goalStatus(s, g, today()) }))
+    .slice(0, 4);
 
   if (s.accounts.length === 0) {
     return (
@@ -60,6 +69,16 @@ export default function Dashboard({ s, nav }: { s: Store; nav: Nav }) {
             {fmt(nw.byCur.HNL, 'HNL')} en lempiras · {fmt(nw.byCur.USD, 'USD')} en dólares
             {s.rate ? ` · tasa L ${s.rate.toFixed(4)}` : ''}
           </p>
+          {(dt.owe > 0 || dt.owed > 0) && (
+            <p className="small hero-debt">
+              {dt.owe > 0 && (
+                <>
+                  Deudas pendientes: <span className="neg">{fmt(dt.owe, s.main)}</span> ·{' '}
+                </>
+              )}
+              Patrimonio neto: <strong>{fmt(nw.total - dt.owe + dt.owed, s.main)}</strong>
+            </p>
+          )}
         </div>
       </section>
 
@@ -89,7 +108,7 @@ export default function Dashboard({ s, nav }: { s: Store; nav: Nav }) {
             <div className="donut-wrap">
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
-                  <Pie isAnimationActive={false} data={byCat} dataKey="value" nameKey="name" innerRadius={60} outerRadius={95} paddingAngle={1} stroke="var(--surface)">
+                  <Pie isAnimationActive={false} data={byCat} dataKey="value" nameKey="name" innerRadius={60} outerRadius={95} paddingAngle={byCat.length > 1 ? 1 : 0} stroke="var(--surface)">
                     {byCat.map((c) => (
                       <Cell key={c.id} fill={c.color} />
                     ))}
@@ -177,6 +196,60 @@ export default function Dashboard({ s, nav }: { s: Store; nav: Nav }) {
           )}
         </section>
       </div>
+
+      {(debtRows.length > 0 || goalRows.length > 0) && (
+        <div className="grid2">
+          <section className="card">
+            <div className="card-head">
+              <h3>Objetivos</h3>
+              <button className="link" onClick={() => nav.go('objetivos')}>
+                Ver todos
+              </button>
+            </div>
+            {goalRows.length === 0 ? (
+              <p className="muted">Crea un objetivo para empezar a ahorrar con propósito.</p>
+            ) : (
+              <ul className="list">
+                {goalRows.map(({ g, st }) => (
+                  <li key={g.id} className="budget-mini">
+                    <div className="row">
+                      <span>{g.icon}</span>
+                      <span className="grow">{g.name}</span>
+                      <span className="small">
+                        {fmt(st.saved, g.currency)} / {fmt(g.target, g.currency)}
+                      </span>
+                    </div>
+                    <Progress ratio={st.ratio} good />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+          <section className="card">
+            <div className="card-head">
+              <h3>Deudas</h3>
+              <button className="link" onClick={() => nav.go('deudas')}>
+                Ver todas
+              </button>
+            </div>
+            {debtRows.length === 0 ? (
+              <p className="muted">No tienes deudas pendientes.</p>
+            ) : (
+              <ul className="list">
+                {debtRows.map(({ d, st }) => (
+                  <li key={d.id} className="budget-mini">
+                    <div className="row">
+                      <span className="grow">{d.name}</span>
+                      <span className="small">Falta {fmt(st.left, d.currency)}</span>
+                    </div>
+                    <Progress ratio={st.ratio} good />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+      )}
 
       <section className="card">
         <div className="card-head">

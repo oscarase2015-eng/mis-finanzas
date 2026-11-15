@@ -26,7 +26,7 @@ const GASTOS: [string, string, string[]][] = [
   ['Personal', '👕', ['Ropa y calzado', 'Cuidado personal', 'Gimnasio']],
   ['Entretenimiento', '🎬', ['Salidas', 'Viajes', 'Pasatiempos', 'Suscripciones']],
   ['Familia', '👨‍👩‍👧', ['Remesas enviadas', 'Apoyo familiar', 'Hijos', 'Mascotas']],
-  ['Finanzas', '🏦', ['Comisiones bancarias', 'Intereses pagados', 'Impuestos', 'Seguros de vida']],
+  ['Finanzas', '🏦', ['Pago de deudas', 'Comisiones bancarias', 'Intereses pagados', 'Impuestos', 'Seguros de vida']],
   ['Regalos y donaciones', '🎁', ['Regalos', 'Iglesia / ofrendas', 'Donaciones']],
   ['Otros gastos', '📦', []],
 ];
@@ -43,8 +43,6 @@ const INGRESOS: [string, string, string[]][] = [
 ];
 
 export async function seedIfEmpty() {
-  const n = await db.categories.count();
-  if (n > 0) return;
   const rows: Category[] = [];
   const add = (list: [string, string, string[]][], kind: CatKind, offset: number) => {
     list.forEach(([name, icon, subs], i) => {
@@ -57,7 +55,10 @@ export async function seedIfEmpty() {
   add(GASTOS, 'gasto', 0);
   add(INGRESOS, 'ingreso', 6);
   await db.transaction('rw', db.categories, db.settings, async () => {
-    await db.categories.bulkPut(rows);
+    // Solo agrega las categorías iniciales que falten (nunca revive las borradas)
+    const have = new Set((await db.categories.bulkGet(rows.map((r) => r.id))).filter(Boolean).map((c) => c!.id));
+    const missing = rows.filter((r) => !have.has(r.id));
+    if (missing.length) await db.categories.bulkPut(missing);
     if (!(await db.settings.get('mainCurrency'))) await db.settings.put({ key: 'mainCurrency', value: 'HNL', updatedAt: 0 });
   });
 }

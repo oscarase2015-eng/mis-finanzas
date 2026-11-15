@@ -61,6 +61,59 @@ export interface Rate extends Base {
   usdToHnl: number;
 }
 
+export type DebtDirection = 'debo' | 'me_deben';
+
+export interface Debt extends Base {
+  name: string;
+  /** A quién se le debe (o quién te debe) */
+  person: string;
+  direction: DebtDirection;
+  currency: Currency;
+  /** Monto total de la deuda en centavos (editable) */
+  total: number;
+  startDate: string;
+  /** Fecha límite opcional para terminar de pagar */
+  dueDate?: string | null;
+  /** Tasa de interés anual en %, solo informativa */
+  rate?: number | null;
+  /** Cuota acordada en centavos (opcional) */
+  installment?: number | null;
+  note: string;
+  color: string;
+}
+
+export interface DebtPayment extends Base {
+  debtId: string;
+  date: string;
+  amount: number;
+  note: string;
+  /** Movimiento creado en una cuenta, si el abono se registró también como gasto o ingreso */
+  txId?: string | null;
+}
+
+export interface Goal extends Base {
+  name: string;
+  icon: string;
+  color: string;
+  currency: Currency;
+  /** Monto objetivo en centavos */
+  target: number;
+  targetDate?: string | null;
+  note: string;
+  /** 1 cuando el usuario lo marca como logrado/archivado */
+  archived: 0 | 1;
+}
+
+export interface GoalContribution extends Base {
+  goalId: string;
+  date: string;
+  /** Centavos; negativo si es un retiro */
+  amount: number;
+  note: string;
+  /** Ahorro que ya existía al crear el objetivo; no cuenta para el ritmo */
+  initial?: boolean;
+}
+
 export interface Setting {
   key: string;
   value: unknown;
@@ -75,6 +128,10 @@ export const db = new Dexie('mis-finanzas') as Dexie & {
   budgets: EntityTable<Budget, 'id'>;
   rates: EntityTable<Rate, 'id'>;
   settings: EntityTable<Setting, 'key'>;
+  debts: EntityTable<Debt, 'id'>;
+  debtPayments: EntityTable<DebtPayment, 'id'>;
+  goals: EntityTable<Goal, 'id'>;
+  goalContributions: EntityTable<GoalContribution, 'id'>;
 };
 
 db.version(1).stores({
@@ -84,6 +141,13 @@ db.version(1).stores({
   budgets: 'id, categoryId, deleted, updatedAt',
   rates: 'id, date, deleted, updatedAt',
   settings: 'key',
+});
+
+db.version(2).stores({
+  debts: 'id, deleted, updatedAt',
+  debtPayments: 'id, debtId, date, deleted, updatedAt',
+  goals: 'id, deleted, updatedAt',
+  goalContributions: 'id, goalId, date, deleted, updatedAt',
 });
 
 export const uid = () =>
@@ -97,7 +161,7 @@ export function stamp<T extends object>(obj: T): T & Base {
   return { ...obj, id: o.id || uid(), createdAt: now, updatedAt: now, deleted: 0 } as T & Base;
 }
 
-type Table = 'accounts' | 'categories' | 'transactions' | 'budgets' | 'rates';
+type Table = 'accounts' | 'categories' | 'transactions' | 'budgets' | 'rates' | 'debts' | 'debtPayments' | 'goals' | 'goalContributions';
 
 export async function save<T extends Base>(table: Table, obj: Partial<T> & { id?: string }) {
   const t = db[table] as unknown as EntityTable<Base, 'id'>;
@@ -125,5 +189,5 @@ export async function setSetting(key: string, value: unknown) {
 }
 
 /** Tablas que se sincronizan con la nube */
-export const SYNC_TABLES = ['accounts', 'categories', 'transactions', 'budgets', 'rates', 'settings'] as const;
+export const SYNC_TABLES = ['accounts', 'categories', 'transactions', 'budgets', 'rates', 'settings', 'debts', 'debtPayments', 'goals', 'goalContributions'] as const;
 export type SyncTable = (typeof SYNC_TABLES)[number];

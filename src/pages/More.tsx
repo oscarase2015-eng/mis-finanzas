@@ -9,8 +9,6 @@ import { Field, Modal, Segmented } from '../components/ui';
 import { AccountCard } from '../components/Auth';
 
 const SOON = [
-  ['🎯', 'Metas de ahorro'],
-  ['🤝', 'Deudas y préstamos'],
   ['📈', 'Inversiones'],
   ['🔁', 'Pagos recurrentes y recordatorios'],
   ['📊', 'Reportes y exportar a Excel'],
@@ -20,6 +18,22 @@ export default function More({ s, email, onLogin }: { s: Store; email: string | 
   return (
     <div className="page">
       <h1>Más</h1>
+      <div className="tiles">
+        <a className="card tile" href="#deudas">
+          <span className="tile-icon">🤝</span>
+          <span>
+            <strong className="block">Deudas</strong>
+            <span className="muted small">{s.debts.length ? `${s.debts.length} registradas` : 'Lo que debes y te deben'}</span>
+          </span>
+        </a>
+        <a className="card tile" href="#objetivos">
+          <span className="tile-icon">🎯</span>
+          <span>
+            <strong className="block">Objetivos</strong>
+            <span className="muted small">{s.goals.length ? `${s.goals.filter((g) => !g.archived).length} activos` : 'Ahorra para tus metas'}</span>
+          </span>
+        </a>
+      </div>
       <AccountCard email={email} onLogin={onLogin} />
       <RateCard s={s} />
       <SettingsCard s={s} />
@@ -36,7 +50,7 @@ export default function More({ s, email, onLogin }: { s: Store; email: string | 
           ))}
         </ul>
       </section>
-      <p className="muted small center">Mis Finanzas · versión 1.1</p>
+      <p className="muted small center">Mis Finanzas · versión 1.2</p>
     </div>
   );
 }
@@ -261,7 +275,11 @@ function BackupCard() {
   const exportAll = async () => {
     const data = {
       app: 'mis-finanzas',
-      version: 1,
+      version: 2,
+      debts: await db.debts.toArray(),
+      debtPayments: await db.debtPayments.toArray(),
+      goals: await db.goals.toArray(),
+      goalContributions: await db.goalContributions.toArray(),
       exportedAt: new Date().toISOString(),
       accounts: await db.accounts.toArray(),
       categories: await db.categories.toArray(),
@@ -284,8 +302,8 @@ function BackupCard() {
       const data = JSON.parse(await f.text());
       if (data.app !== 'mis-finanzas') throw new Error('formato');
       if (!confirm('Esto reemplaza TODOS los datos de este dispositivo con los del respaldo. ¿Continuar?')) return;
-      await db.transaction('rw', [db.accounts, db.categories, db.transactions, db.budgets, db.rates, db.settings], async () => {
-        for (const t of ['accounts', 'categories', 'transactions', 'budgets', 'rates', 'settings'] as const) {
+      await db.transaction('rw', [db.accounts, db.categories, db.transactions, db.budgets, db.rates, db.settings, db.debts, db.debtPayments, db.goals, db.goalContributions], async () => {
+        for (const t of ['accounts', 'categories', 'transactions', 'budgets', 'rates', 'settings', 'debts', 'debtPayments', 'goals', 'goalContributions'] as const) {
           await db[t].clear();
           await (db[t] as unknown as { bulkAdd: (r: unknown[]) => Promise<unknown> }).bulkAdd(data[t] ?? []);
         }

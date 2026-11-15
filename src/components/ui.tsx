@@ -90,8 +90,8 @@ export function AccountSelect({ s, value, onChange, exclude, allowEmpty }: { s: 
   );
 }
 
-export function Progress({ ratio }: { ratio: number }) {
-  const cls = ratio >= 1 ? 'over' : ratio >= 0.8 ? 'warn' : 'ok';
+export function Progress({ ratio, good }: { ratio: number; good?: boolean }) {
+  const cls = good ? 'goal-fill' : ratio >= 1 ? 'over' : ratio >= 0.8 ? 'warn' : 'ok';
   return (
     <div className="progress">
       <div className={`progress-fill ${cls}`} style={{ width: `${Math.min(ratio, 1) * 100}%` }} />

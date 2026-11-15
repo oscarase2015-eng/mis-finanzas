@@ -5,6 +5,8 @@ import Transactions from './pages/Transactions';
 import Accounts from './pages/Accounts';
 import Budgets from './pages/Budgets';
 import More from './pages/More';
+import Debts from './pages/Debts';
+import Goals from './pages/Goals';
 import TxForm from './components/TxForm';
 import type { Transaction } from './db';
 import type { Session } from '@supabase/supabase-js';
@@ -12,13 +14,15 @@ import { startCloud, supabase } from './cloud';
 import { LoginScreen, NewPasswordModal, syncLabel, useSyncState } from './components/Auth';
 import { remember } from './theme';
 
-export type Page = 'inicio' | 'movimientos' | 'cuentas' | 'presupuestos' | 'mas';
+export type Page = 'inicio' | 'movimientos' | 'cuentas' | 'presupuestos' | 'deudas' | 'objetivos' | 'mas';
 
 const ICONS: Record<Page, string> = {
   inicio: 'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z',
   movimientos: 'M4 6h16M4 12h16M4 18h10',
   cuentas: 'M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 10h18M7 15h4',
   presupuestos: 'M12 3a9 9 0 1 0 9 9h-9zM15 3.5A9 9 0 0 1 20.5 9H15z',
+  deudas: 'M12 3v18M17 7.5c0-1.9-2.2-3-5-3s-5 1.1-5 3 2.2 2.8 5 3.5 5 1.6 5 3.5-2.2 3-5 3-5-1.1-5-3',
+  objetivos: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 12h.01',
   mas: 'M5 12h.01M12 12h.01M19 12h.01',
 };
 
@@ -33,8 +37,11 @@ const NAV: { id: Page; label: string }[] = [
   { id: 'movimientos', label: 'Movimientos' },
   { id: 'cuentas', label: 'Cuentas' },
   { id: 'presupuestos', label: 'Presupuestos' },
+  { id: 'deudas', label: 'Deudas' },
+  { id: 'objetivos', label: 'Objetivos' },
   { id: 'mas', label: 'Más' },
 ];
+const BOTTOM: Page[] = ['inicio', 'movimientos', 'cuentas', 'presupuestos', 'mas'];
 
 function readHash(): { page: Page; account?: string } {
   const h = window.location.hash.replace('#', '');
@@ -123,6 +130,8 @@ export default function App() {
         {route.page === 'movimientos' && <Transactions s={store} nav={nav} accountFilter={route.account} />}
         {route.page === 'cuentas' && <Accounts s={store} nav={nav} />}
         {route.page === 'presupuestos' && <Budgets s={store} />}
+        {route.page === 'deudas' && <Debts s={store} />}
+        {route.page === 'objetivos' && <Goals s={store} />}
         {route.page === 'mas' && (
           <More
             s={store}
@@ -140,8 +149,8 @@ export default function App() {
       </button>
 
       <nav className="bottombar">
-        {NAV.map((n) => (
-          <button key={n.id} className={route.page === n.id ? 'active' : ''} onClick={() => nav.go(n.id)}>
+        {NAV.filter((n) => BOTTOM.includes(n.id)).map((n) => (
+          <button key={n.id} className={route.page === n.id || (n.id === 'mas' && (route.page === 'deudas' || route.page === 'objetivos')) ? 'active' : ''} onClick={() => nav.go(n.id)}>
             <Icon id={n.id} />
             <span>{n.label}</span>
           </button>
