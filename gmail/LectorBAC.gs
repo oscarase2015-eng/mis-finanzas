@@ -17,14 +17,15 @@
 
 const SUPABASE_URL = 'https://klpclwfywtiqyoszjhsx.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_Vp_ysb05JlUUXMFpN4e0MQ_MBh73jC2'; // llave pública (no es secreta)
-const BUSQUEDA = '(from:baccredomatic.com OR "BAC Credomatic") newer_than:7d -label:finanzas-registrado';
+const BUSQUEDA = '(from:baccredomatic.com OR "BAC Credomatic") newer_than:7d';
 const ETIQUETA = 'finanzas-registrado';
 
 /** Corre cada 5 minutos: lee correos nuevos y los envía a la app */
 function revisarCorreos() {
-  const hilos = GmailApp.search(BUSQUEDA, 0, 50);
-  if (!hilos.length) return;
   const etiqueta = GmailApp.getUserLabelByName(ETIQUETA) || GmailApp.createLabel(ETIQUETA);
+  const hilos = GmailApp.search(BUSQUEDA, 0, 100).filter(function (h) {
+    return !h.getLabels().some(function (l) { return l.getName() === ETIQUETA; });
+  });
   const items = [];
   const listos = [];
   hilos.forEach(function (hilo) {
@@ -46,7 +47,9 @@ function probar() {
   GmailApp.search('(from:baccredomatic.com OR "BAC Credomatic") newer_than:30d', 0, 20).forEach(function (h) {
     h.getMessages().forEach(function (m) {
       const r = leerCorreo(m);
-      console.log(m.getSubject() + ' -> ' + (r === null ? 'no reconocido' : JSON.stringify(r)));
+      let info = r === null ? 'no reconocido' : JSON.stringify(r);
+      if (r === null && /informa/i.test(m.getSubject())) info += ' | TEXTO: ' + textos(m)[1].replace(/\s+/g, ' ').slice(0, 700);
+      console.log(m.getSubject() + ' -> ' + info);
     });
   });
   const p = PropertiesService.getScriptProperties();
@@ -64,12 +67,30 @@ function instalar() {
 
 /** Devuelve el elemento para la bandeja, 'omitir' (p. ej. rechazada) o null si no se reconoce */
 function leerCorreo(m) {
-  const texto = (m.getPlainBody() || m.getBody().replace(/<[^>]+>/g, ' ')).replace(/&nbsp;/g, ' ');
-  const r = interpretar(texto, m.getDate());
+  const tx = textos(m);
+  let texto = tx[0];
+  let r = interpretar(texto, m.getDate());
+  if (r === null) { texto = tx[1]; r = interpretar(texto, m.getDate()); }
   if (!r || r === 'omitir') return r;
   r.id = 'gmail:' + m.getId();
   r.raw = (m.getSubject() + ' · ' + texto.replace(/\s+/g, ' ')).slice(0, 600);
   return r;
+}
+
+/** [texto plano, texto sacado del HTML] */
+function textos(m) {
+  let plano = '';
+  try { plano = m.getPlainBody() || ''; } catch (e) {}
+  return [plano, htmlATexto(m.getBody() || '')];
+}
+
+function htmlATexto(h) {
+  return h.replace(/<(style|script|head)[\s\S]*?<\/\1>/gi, ' ')
+    .replace(/<br\s*\/?>|<\/(td|th|tr|p|div|li|h\d|table)>/gi, '\n')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&').replace(/&quot;/gi, '"').replace(/&lt;/gi, '<').replace(/&gt;/gi, '>')
+    .replace(/&#(\d+);/g, function (_, n) { return String.fromCharCode(+n); })
+    .replace(/&([aeiou])acute;/gi, '$1').replace(/&ntilde;/gi, 'n').replace(/&[a-z]+;/gi, ' ');
 }
 
 /** Interpreta el texto de la notificación. Separado para poder probarlo. */
@@ -80,13 +101,13 @@ function interpretar(texto, fechaCorreo) {
   const base = { source: 'gmail', type: 'gasto', status: 'pendiente', cardLast4: null };
 
   // Formato 1: compra con tarjeta ("BAC Credomatic Informa: VISA 8572 ... Comercio Monto Horario ...")
-  let c = t.match(new RegExp('Horario:?\\s+(.+?)\\s+' + mon + '\\s*' + num + '\\s+(\\d{4})[/-](\\d{2})[/-](\\d{2})', 'i'));
+  let c = t.match(new RegExp('Horario:?\\s+(.{1,120}?)\\s+' + mon + '\\s*' + num + '\\s+(\\d{4})[/-](\\d{1,2})[/-](\\d{1,2})', 'i'));
   if (c) {
     if (/\b(Rechazad|Denegad|Declinad)/i.test(t)) return 'omitir';
     const tarjeta = t.match(/(?:VISA|MASTERCARD|MASTER CARD|AMEX|AMERICAN EXPRESS)[^\d]{0,15}(\d{4})/i);
     return Object.assign(base, {
       merchant: c[1].trim(), currency: moneda(c[2]), amount: centavos(c[3]),
-      date: c[4] + '-' + c[5] + '-' + c[6], cardLast4: tarjeta ? tarjeta[1] : null,
+      date: c[4] + '-' + pad(c[5]) + '-' + pad(c[6]), cardLast4: tarjeta ? tarjeta[1] : null,
     });
   }
 
