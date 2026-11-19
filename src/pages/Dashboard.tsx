@@ -3,7 +3,8 @@ import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveCo
 import type { Nav } from '../App';
 import { catBudgetSpent } from './Budgets';
 import { debtStatus, debtTotals, expenseByRoot, goalStatus, netWorth, totals, type Store } from '../data';
-import { addMonths, monthLabel, monthOf, quincenaOf, today, type Period } from '../dates';
+import { addMonths, monthLabel, monthOf, quincenaOf, shortDate, today, type Period } from '../dates';
+import { cardAlerts } from './Cards';
 import { fmt, fmtShort } from '../money';
 import { Empty, PeriodNav, Progress, RateWarning } from '../components/ui';
 import TxRow from '../components/TxRow';
@@ -60,6 +61,11 @@ export default function Dashboard({ s, nav }: { s: Store; nav: Nav }) {
     <div className="page">
       <h1>Inicio</h1>
       <RateWarning s={s} />
+      {cardAlerts(s).map(({ acc, st, days }) => (
+        <a key={acc.id} className={`notice inbox-banner ${days < 0 ? 'late' : ''}`} href="#tarjetas">
+          💳 {days < 0 ? 'Pago vencido' : 'Pago de tarjeta'}: <strong>{fmt(st.pending, acc.currency)}</strong> de {acc.name}, {days > 1 ? `vence en ${days} días` : days === 1 ? 'vence mañana' : days === 0 ? 'vence hoy' : `venció hace ${-days} días`} ({shortDate(st.cycle.payDate)}).
+        </a>
+      ))}
       {s.inbox.length > 0 && (
         <a className="notice inbox-banner" href="#revisar">
           📬 Tienes <strong>{s.inbox.length}</strong> {s.inbox.length === 1 ? 'gasto' : 'gastos'} de tu banco por revisar. Toca para confirmarlos.

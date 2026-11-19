@@ -309,3 +309,19 @@ details summary { cursor: pointer; margin-top: 6px; }
 .raw { white-space: pre-wrap; color: var(--muted); }
 .inbox-banner { display: block; text-decoration: none; color: inherit; background: color-mix(in srgb, var(--primary) 12%, var(--surface)); border-color: color-mix(in srgb, var(--primary) 40%, transparent); }
 .count { margin-left: auto; background: var(--primary); color: var(--primary-ink); border-radius: 99px; font-size: 0.75rem; padding: 1px 8px; font-weight: 700; }
+
+/* Tarjetas de crédito */
+.card-cc h3 { margin: 0; }
+.cc-body { margin-top: 12px; }
+.cc-body + .cc-body { border-top: 1px solid var(--line); padding-top: 12px; }
+.cc-cur { font-weight: 700; margin: 0 0 6px; }
+.cc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 420px) { .cc-grid { grid-template-columns: 1fr; } }
+.cc-box { display: flex; flex-direction: column; gap: 4px; padding: 12px; border-radius: 12px; background: var(--hover); }
+.cc-box.due { background: color-mix(in srgb, var(--warn) 12%, var(--surface)); }
+.cc-box.late { background: color-mix(in srgb, var(--neg) 12%, var(--surface)); }
+.cc-box.ok { background: color-mix(in srgb, var(--pos) 12%, var(--surface)); }
+.cc-amount { font-size: 1.45rem; font-variant-numeric: tabular-nums; }
+.cc-list { margin: 8px 0; }
+.cc-list summary { cursor: pointer; color: var(--muted); }
+.notice.late { background: color-mix(in srgb, var(--neg) 12%, var(--surface)); border-color: color-mix(in srgb, var(--neg) 40%, transparent); }

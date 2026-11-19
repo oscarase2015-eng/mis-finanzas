@@ -32,7 +32,8 @@ export function guessCategory(s: Store, merchant: string): string {
 export function guessAccount(s: Store, item: InboxItem): string {
   const active = s.accounts.filter((a) => !a.archived);
   if (item.cardLast4) {
-    const byCard = active.find((a) => a.cardLast4 && a.cardLast4 === item.cardLast4);
+    const matches = active.filter((a) => a.cardLast4 && a.cardLast4 === item.cardLast4);
+    const byCard = matches.find((a) => a.currency === item.currency) ?? matches[0];
     if (byCard) return byCard.id;
   }
   const sameCur = active.filter((a) => a.currency === item.currency);

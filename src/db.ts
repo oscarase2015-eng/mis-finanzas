@@ -25,6 +25,9 @@ export interface Account extends Base {
   creditLimit?: number;
   /** Últimos 4 dígitos de la tarjeta, para reconocer las notificaciones del banco */
   cardLast4?: string;
+  /** Solo tarjetas: día de corte y día límite de pago (1-31) */
+  cutDay?: number;
+  payDay?: number;
 }
 
 export interface Category extends Base {

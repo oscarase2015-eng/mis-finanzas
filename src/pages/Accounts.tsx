@@ -117,6 +117,8 @@ function AccountForm({ s, account, onClose }: { s: Store; account?: Account; onC
   const [limit, setLimit] = useState(account?.creditLimit ? centsToInput(account.creditLimit) : '');
   const [color, setColor] = useState(account?.color ?? PALETTE[s.accounts.length % PALETTE.length]);
   const [card, setCard] = useState(account?.cardLast4 ?? '');
+  const [cutDay, setCutDay] = useState(account?.cutDay ? String(account.cutDay) : '');
+  const [payDay, setPayDay] = useState(account?.payDay ? String(account.payDay) : '');
   const [error, setError] = useState('');
   const used = account ? s.txs.some((t) => t.accountId === account.id || t.toAccountId === account.id) : false;
 
@@ -124,6 +126,8 @@ function AccountForm({ s, account, onClose }: { s: Store; account?: Account; onC
     if (!name.trim()) return setError('Ponle un nombre a la cuenta.');
     const ini = initial.trim() ? parseAmount(initial) : 0;
     if (ini === null) return setError('El saldo inicial no es un número válido.');
+    const day = (v: string) => { const n = Number(v); return v.trim() && Number.isInteger(n) && n >= 1 && n <= 31 ? n : undefined; };
+    if (isCard && ((cutDay.trim() && !day(cutDay)) || (payDay.trim() && !day(payDay)))) return setError('Los días de corte y de pago deben ser números del 1 al 31.');
     await save<Account>('accounts', {
       id: account?.id,
       name: name.trim(),
@@ -133,6 +137,8 @@ function AccountForm({ s, account, onClose }: { s: Store; account?: Account; onC
       creditLimit: isCard ? parseAmount(limit) ?? undefined : undefined,
       color,
       cardLast4: card.replace(/\D/g, '').slice(-4) || undefined,
+      cutDay: isCard ? day(cutDay) : undefined,
+      payDay: isCard ? day(payDay) : undefined,
       archived: account?.archived ?? 0,
     });
     onClose();
@@ -211,6 +217,16 @@ function AccountForm({ s, account, onClose }: { s: Store; account?: Account; onC
           <Field label="Límite de crédito">
             <AmountInput value={limit} onChange={setLimit} currency={currency} />
           </Field>
+        )}
+        {isCard && (
+          <div className="grid2" style={{ gridTemplateColumns: "1fr 1fr" }}>
+            <Field label="Día de corte" hint="Ej.: 3">
+              <input inputMode="numeric" maxLength={2} value={cutDay} onChange={(e) => setCutDay(e.target.value.replace(/\D/g, ''))} placeholder="3" />
+            </Field>
+            <Field label="Día de pago" hint="Fecha límite, ej.: 24">
+              <input inputMode="numeric" maxLength={2} value={payDay} onChange={(e) => setPayDay(e.target.value.replace(/\D/g, ''))} placeholder="24" />
+            </Field>
+          </div>
         )}
         {(type === 'tarjeta' || type === 'banco') && (
           <Field label="Últimos 4 dígitos de la tarjeta (opcional)" hint="Sirve para asignar a esta cuenta los gastos que llegan por correo.">

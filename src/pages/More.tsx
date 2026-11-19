@@ -21,6 +21,13 @@ export default function More({ s, email, onLogin }: { s: Store; email: string | 
     <div className="page">
       <h1>Más</h1>
       <div className="tiles">
+        <a className="card tile" href="#tarjetas">
+          <span className="tile-icon">💳</span>
+          <span>
+            <strong className="block">Tarjetas</strong>
+            <span className="muted small">Corte, pago y gasto del periodo</span>
+          </span>
+        </a>
         <a className="card tile" href="#revisar">
           <span className="tile-icon">📬</span>
           <span>
@@ -59,7 +66,7 @@ export default function More({ s, email, onLogin }: { s: Store; email: string | 
           ))}
         </ul>
       </section>
-      <p className="muted small center">Mis Finanzas · versión 1.3</p>
+      <p className="muted small center">Mis Finanzas · versión 1.4</p>
     </div>
   );
 }
