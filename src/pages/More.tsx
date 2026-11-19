@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
 import type { Store } from '../data';
-import { db, save, setSetting, softDelete, type Category, type CatKind, type Currency, type Rate } from '../db';
+import { db, getSetting, save, setSetting, softDelete, type Category, type CatKind, type Currency, type Rate } from '../db';
 import { today, shortDate } from '../dates';
 import { CURRENCY_NAME } from '../money';
+import { AUTO_RATE_KEY, updateAutoRate } from '../rates';
 import { PALETTE } from '../seed';
 import { applyTheme, getTheme, type Theme } from '../theme';
 import { Field, Modal, Segmented } from '../components/ui';
@@ -57,7 +59,7 @@ export default function More({ s, email, onLogin }: { s: Store; email: string | 
           ))}
         </ul>
       </section>
-      <p className="muted small center">Mis Finanzas · versión 1.2</p>
+      <p className="muted small center">Mis Finanzas · versión 1.3</p>
     </div>
   );
 }
@@ -66,10 +68,21 @@ function RateCard({ s }: { s: Store }) {
   const [value, setValue] = useState('');
   const [date, setDate] = useState(today());
   const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+  const auto = useLiveQuery(() => getSetting(AUTO_RATE_KEY, true), [], true);
+  const latest = s.rates[0];
+  const refresh = async () => {
+    setBusy(true);
+    setMsg('');
+    const r = await updateAutoRate(true);
+    setBusy(false);
+    setMsg(r === 'ok' ? 'Tasa actualizada.' : 'No pude obtener la tasa. Revisa tu conexión e intenta de nuevo.');
+  };
   const add = async () => {
     const v = Number(value.replace(',', '.'));
     if (!Number.isFinite(v) || v <= 0) return setErr('Escribe cuántos lempiras vale un dólar, por ejemplo 26.50');
-    await save<Rate>('rates', { date, usdToHnl: v });
+    await save<Rate>('rates', { date, usdToHnl: v, source: 'manual' });
     setValue('');
     setErr('');
   };
@@ -78,6 +91,20 @@ function RateCard({ s }: { s: Store }) {
       <h3>Tasa de cambio</h3>
       <p className="muted small">Se usa para sumar cuentas en dólares y lempiras en los totales. Nunca cambia los montos que ya anotaste.</p>
       <p className="big">{s.rate ? `US$ 1 = L ${s.rate.toFixed(4)}` : 'Sin tasa todavía'}</p>
+      {latest && <p className="muted small">{latest.source === 'auto' ? 'Automática' : 'Manual'} · {shortDate(latest.date)}</p>}
+      <label className="row check">
+        <input type="checkbox" checked={!!auto} onChange={(e) => setSetting(AUTO_RATE_KEY, e.target.checked)} />
+        <span className="grow">Actualizar sola cada día (tasa de mercado de internet)</span>
+      </label>
+      {auto && (
+        <p>
+          <button className="btn ghost" disabled={busy} onClick={refresh}>
+            {busy ? 'Buscando…' : 'Actualizar ahora'}
+          </button>
+          {msg && <span className="muted small"> {msg}</span>}
+        </p>
+      )}
+      <p className="muted small">También puedes poner la tasa a mano, por ejemplo la de tu banco. La más reciente es la que se usa.</p>
       <div className="inline-form">
         <input inputMode="decimal" placeholder="L por dólar, ej. 26.50" value={value} onChange={(e) => setValue(e.target.value)} />
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
@@ -92,7 +119,7 @@ function RateCard({ s }: { s: Store }) {
           <ul className="list">
             {s.rates.map((r) => (
               <li key={r.id} className="row">
-                <span className="grow">{shortDate(r.date)}</span>
+                <span className="grow">{shortDate(r.date)}{r.source === 'auto' && <span className="muted small"> · auto</span>}</span>
                 <span>L {r.usdToHnl.toFixed(4)}</span>
                 <button className="link danger" onClick={() => softDelete('rates', r.id)}>
                   Quitar

@@ -61,6 +61,8 @@ export interface Rate extends Base {
   date: string;
   /** Lempiras por 1 dólar */
   usdToHnl: number;
+  /** 'auto' si la trajo la app de internet */
+  source?: 'auto' | 'manual';
 }
 
 export type DebtDirection = 'debo' | 'me_deben';

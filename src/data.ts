@@ -45,7 +45,7 @@ export function useStore(): Store {
   const accounts = data?.accounts ?? [];
   const categories = (data?.categories ?? []).sort((a, b) => a.name.localeCompare(b.name, 'es'));
   const txs = (data?.txs ?? []).sort((a, b) => (a.date === b.date ? b.createdAt - a.createdAt : a.date < b.date ? 1 : -1));
-  const rates = (data?.rates ?? []).sort((a, b) => (a.date === b.date ? b.createdAt - a.createdAt : a.date < b.date ? 1 : -1));
+  const rates = (data?.rates ?? []).sort((a, b) => (a.date === b.date ? (b.updatedAt ?? b.createdAt) - (a.updatedAt ?? a.createdAt) : a.date < b.date ? 1 : -1));
   const balances = new Map<string, number>();
   for (const a of accounts) balances.set(a.id, a.initialBalance);
   for (const t of txs) {

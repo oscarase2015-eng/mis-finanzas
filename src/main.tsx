@@ -4,6 +4,7 @@ import App from './App';
 import './styles.css';
 import { seedIfEmpty } from './seed';
 import { applyTheme } from './theme';
+import { startAutoRate } from './rates';
 
 applyTheme();
 
@@ -18,6 +19,7 @@ if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
   });
 }
 seedIfEmpty().finally(() => {
+  startAutoRate();
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <App />
