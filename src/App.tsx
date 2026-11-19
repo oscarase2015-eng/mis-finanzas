@@ -108,10 +108,10 @@ export default function App() {
       <nav className="sidebar">
         <div className="brand">
           <svg width={28} height={28} viewBox="0 0 512 512" aria-hidden="true">
-            <rect width="512" height="512" rx="112" fill="#0f766e" />
+            <rect width="512" height="512" rx="112" fill="#2a2c31" />
             <rect x="112" y="280" width="64" height="120" rx="12" fill="#ccfbf1" />
             <rect x="224" y="208" width="64" height="192" rx="12" fill="#ccfbf1" />
-            <rect x="336" y="128" width="64" height="272" rx="12" fill="#fff" />
+            <rect x="336" y="128" width="64" height="272" rx="12" fill="#ff4a1c" />
           </svg>
           <span>Mis Finanzas</span>
         </div>

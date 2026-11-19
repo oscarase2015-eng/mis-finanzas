@@ -5,6 +5,8 @@ import { catBudgetSpent } from './Budgets';
 import { debtStatus, debtTotals, expenseByRoot, goalStatus, netWorth, totals, type Store } from '../data';
 import { addMonths, monthLabel, monthOf, quincenaOf, shortDate, today, type Period } from '../dates';
 import { cardAlerts } from './Cards';
+
+const todayLabel = () => new Date().toLocaleDateString('es-HN', { weekday: 'short', day: 'numeric', month: 'short' }).replace(/\./g, '');
 import { fmt, fmtShort } from '../money';
 import { Empty, PeriodNav, Progress, RateWarning } from '../components/ui';
 import TxRow from '../components/TxRow';
@@ -74,7 +76,8 @@ export default function Dashboard({ s, nav }: { s: Store; nav: Nav }) {
 
       <section className="card hero">
         <div>
-          <p className="muted">Patrimonio total</p>
+          <span className="today-chip">{todayLabel()}</span>
+          <p className="muted" style={{ marginTop: 14 }}>Patrimonio total</p>
           <p className="big">{fmt(nw.total, s.main)}</p>
           <p className="muted small">
             {fmt(nw.byCur.HNL, 'HNL')} en lempiras · {fmt(nw.byCur.USD, 'USD')} en dólares
