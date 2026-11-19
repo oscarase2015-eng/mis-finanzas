@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => ({
       : VitePWA({
           registerType: 'autoUpdate',
           includeAssets: ['icon.svg'],
+          workbox: { globPatterns: ['**/*.{js,css,html,svg,png,woff2}'] },
           manifest: {
             name: 'Mis Finanzas',
             short_name: 'Finanzas',
