@@ -5,6 +5,8 @@ import '@fontsource/roboto/latin-300.css';
 import '@fontsource/roboto/latin-400.css';
 import '@fontsource/roboto/latin-500.css';
 import '@fontsource/doto/latin-800.css';
+import '@fontsource/space-mono/latin-400.css';
+import '@fontsource/space-mono/latin-700.css';
 import './styles.css';
 import { seedIfEmpty } from './seed';
 import { applyTheme } from './theme';
