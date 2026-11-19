@@ -60,33 +60,32 @@ export default function Accounts({ s, nav }: { s: Store; nav: Nav }) {
           if (!items.length) return null;
           return (
             <section key={t.value}>
-              <h4 className="day-head">
-                {t.icon} {t.label}
-              </h4>
+              <h4 className="day-head">{t.label}</h4>
               <div className="acc-grid">
                 {items.map((a) => {
                   const b = s.balances.get(a.id) ?? 0;
                   const isCard = a.type === 'tarjeta';
                   return (
-                    <div key={a.id} className={`card acc ${a.archived ? 'archived' : ''}`} style={{ borderTopColor: a.color }}>
-                      <div className="row">
-                        <strong className="grow">{a.name}</strong>
-                        <span className="badge">{a.currency === 'HNL' ? 'L' : 'US$'}</span>
+                    <div key={a.id} className={`acc-face ${a.archived ? 'archived' : ''}`}>
+                      <div className="acc-face-top">
+                        <span className="grow">{a.name}</span>
+                        <span className="acc-face-cur">{a.currency === 'HNL' ? 'L' : 'US$'}</span>
+                        <span className="cc-face-chip" style={{ background: a.color }} />
                       </div>
-                      <p className={`big ${b < 0 ? 'neg' : ''}`}>{fmt(b, a.currency)}</p>
-                      {isCard && a.creditLimit ? <p className="muted small">Disponible: {fmt(a.creditLimit + b, a.currency)} de {fmt(a.creditLimit, a.currency)}</p> : null}
-                      {a.archived ? <p className="muted small">Archivada</p> : null}
-                      <div className="row acc-actions">
-                        <button className="link" onClick={() => nav.go('movimientos', { account: a.id })}>
-                          Movimientos
-                        </button>
-                        <button className="link" onClick={() => nav.newTx({ accountId: a.id })}>
-                          Anotar
-                        </button>
+                      <span className="cc-face-label">{isCard ? 'Deuda' : 'Saldo'}{a.archived ? ' · archivada' : ''}</span>
+                      <span className="acc-face-amount">{fmt(isCard ? Math.max(0, -b) : b, a.currency)}</span>
+                      {isCard && a.creditLimit ? (
+                        <span className="acc-face-sub">
+                          Disponible {fmt(a.creditLimit + b, a.currency)} de {fmt(a.creditLimit, a.currency)}
+                        </span>
+                      ) : (
+                        <span className="acc-face-sub">{a.cardLast4 ? `•••• ${a.cardLast4}` : '\u00a0'}</span>
+                      )}
+                      <div className="acc-face-actions">
+                        <button onClick={() => nav.go('movimientos', { account: a.id })}>Movimientos</button>
+                        <button onClick={() => nav.newTx({ accountId: a.id })}>Anotar</button>
                         <span className="spacer" />
-                        <button className="link" onClick={() => setEdit(a)}>
-                          Editar
-                        </button>
+                        <button onClick={() => setEdit(a)}>Editar</button>
                       </div>
                     </div>
                   );
@@ -199,7 +198,7 @@ function AccountForm({ s, account, onClose }: { s: Store; account?: Account; onC
           <select value={type} onChange={(e) => setType(e.target.value as AccountType)}>
             {ACCOUNT_TYPES.map((t) => (
               <option key={t.value} value={t.value}>
-                {t.icon} {t.label}
+                {t.label}
               </option>
             ))}
           </select>

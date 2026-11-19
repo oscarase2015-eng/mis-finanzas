@@ -468,3 +468,20 @@ h3, .field-label, .day-head, .facts dt, .stat > p.muted:first-child, .hero > div
 .cc-tile.late * { color: var(--accent-ink) !important; }
 .cc-tile.late .btn.primary { background: #000; border-color: #000; }
 .cc-summary { gap: 8px; }
+
+/* Cuentas con el mismo estilo de las tarjetas */
+.acc-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.acc-face {
+  display: flex; flex-direction: column; gap: 2px; padding: 18px 20px 14px; border-radius: 22px; min-height: 190px;
+  background: #000; color: #f2f2f4;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1.4px); background-size: 8px 8px;
+}
+.acc-face.archived { opacity: 0.5; }
+.acc-face-top { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: auto; padding-bottom: 14px; }
+.acc-face-top .grow { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acc-face-cur { font-size: 0.68rem; color: #9a9ba1; }
+.acc-face-amount { font-family: var(--dot); font-weight: 800; font-size: clamp(1.6rem, 7vw, 2.1rem); line-height: 1.1; }
+.acc-face-sub { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; color: #9a9ba1; margin-top: 4px; }
+.acc-face-actions { display: flex; gap: 16px; margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.12); }
+.acc-face-actions button { background: none; border: 0; padding: 4px 0; color: #f2f2f4; cursor: pointer; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.acc-face-actions button:hover { color: var(--accent); }
