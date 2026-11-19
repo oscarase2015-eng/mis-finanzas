@@ -435,17 +435,17 @@ h3, .field-label, .day-head, .facts dt, .stat > p.muted:first-child, .hero > div
 .cc-face {
   flex: 0 0 min(88%, 360px); scroll-snap-align: start; aspect-ratio: 1.62; text-align: left; cursor: pointer;
   display: flex; flex-direction: column; gap: 2px; padding: 18px 20px; border-radius: 22px; border: 0;
-  background: #000; color: #f2f2f4; opacity: 0.55; transition: opacity 0.2s, transform 0.2s;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1.4px); background-size: 8px 8px;
+  background-color: #000; color: #f2f2f4; opacity: 0.55; transition: opacity 0.2s, transform 0.2s;
+  background-image: radial-gradient(circle, var(--face-dot, rgba(255,255,255,0.07)) 1px, transparent 1.4px); background-size: 8px 8px;
 }
 .cc-face.on { opacity: 1; }
 .cc-face-top { display: flex; justify-content: space-between; align-items: center; font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: auto; }
 .cc-face-chip { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
-.cc-face-label { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #9a9ba1; margin-top: 10px; }
+.cc-face-label { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--face-muted, #9a9ba1); margin-top: 10px; }
 .cc-face-amount { font-family: var(--dot); font-weight: 800; font-size: clamp(1.4rem, 6.5vw, 1.9rem); line-height: 1.1; }
-.cc-face-num { font-family: var(--mono); font-size: 0.85rem; letter-spacing: 0.12em; color: #c9cad0; margin-top: 8px; }
+.cc-face-num { font-family: var(--mono); font-size: 0.85rem; letter-spacing: 0.12em; color: inherit; opacity: 0.8; margin-top: 8px; }
 .cc-face-foot { display: flex; gap: 28px; margin-top: 8px; font-size: 0.9rem; }
-.cc-face-foot small { display: block; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: #9a9ba1; }
+.cc-face-foot small { display: block; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--face-muted, #9a9ba1); }
 .cc-dots { display: flex; justify-content: center; gap: 6px; margin-top: -4px; }
 .cc-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--line); }
 .cc-dots span.on { background: var(--text); }
@@ -473,15 +473,32 @@ h3, .field-label, .day-head, .facts dt, .stat > p.muted:first-child, .hero > div
 .acc-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
 .acc-face {
   display: flex; flex-direction: column; gap: 2px; padding: 18px 20px 14px; border-radius: 22px; min-height: 190px;
-  background: #000; color: #f2f2f4;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1.4px); background-size: 8px 8px;
+  background-color: #000; color: #f2f2f4;
+  background-image: radial-gradient(circle, var(--face-dot, rgba(255,255,255,0.07)) 1px, transparent 1.4px); background-size: 8px 8px;
 }
 .acc-face.archived { opacity: 0.5; }
 .acc-face-top { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: auto; padding-bottom: 14px; }
 .acc-face-top .grow { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.acc-face-cur { font-size: 0.68rem; color: #9a9ba1; }
+.acc-face-cur { font-size: 0.68rem; color: var(--face-muted, #9a9ba1); }
 .acc-face-amount { font-family: var(--dot); font-weight: 800; font-size: clamp(1.6rem, 7vw, 2.1rem); line-height: 1.1; }
-.acc-face-sub { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; color: #9a9ba1; margin-top: 4px; }
-.acc-face-actions { display: flex; gap: 16px; margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.12); }
-.acc-face-actions button { background: none; border: 0; padding: 4px 0; color: #f2f2f4; cursor: pointer; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.acc-face-sub { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; color: var(--face-muted, #9a9ba1); margin-top: 4px; }
+.acc-face-actions { display: flex; gap: 16px; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--face-line, rgba(255,255,255,0.12)); }
+.acc-face-actions button { background: none; border: 0; padding: 4px 0; color: inherit; cursor: pointer; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; }
 .acc-face-actions button:hover { color: var(--accent); }
+
+.cc-face-chip { background: var(--accent) !important; }
+/* Rueda de color */
+.cw { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.cw-preview { width: 100%; max-width: 320px; min-height: 130px; }
+.cw-wheel {
+  position: relative; width: min(240px, 70vw); aspect-ratio: 1; border-radius: 50%; cursor: crosshair; touch-action: none;
+  background: radial-gradient(circle, #fff, rgba(255,255,255,0) 70%), conic-gradient(red, #ff0, lime, cyan, blue, #f0f, red);
+}
+.cw-wheel::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: #000; opacity: var(--v); pointer-events: none; }
+.cw-marker { position: absolute; z-index: 1; width: 22px; height: 22px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.3); transform: translate(-50%, -50%); pointer-events: none; }
+.cw-row { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 4px; }
+.cw-range { -webkit-appearance: none; appearance: none; height: 14px; padding: 0; min-height: 0; border-radius: 99px; border: 1px solid var(--line); background: linear-gradient(90deg, #000, var(--to)); }
+.cw-range::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid #000; }
+.cw-range::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 2px solid #000; }
+.cw-presets { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; justify-content: center; }
+.cw-hex { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); margin-left: 6px; }

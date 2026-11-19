@@ -6,6 +6,7 @@ import { cardStatus, daysBetween, type CardStatus } from '../cards';
 import { shortDate, today } from '../dates';
 import { centsToInput, fmt, parseAmount } from '../money';
 import { AmountInput, Empty, Field, Modal, Progress, Segmented } from '../components/ui';
+import { faceStyle } from '../components/ColorWheel';
 
 export function cardAlerts(s: Store) {
   const d = today();
@@ -77,7 +78,7 @@ export default function Cards({ s, nav }: { s: Store; nav: Nav }) {
       {/* 1. Tarjetas (se deslizan) */}
       <div className="cc-carousel" role="tablist">
         {groups.map((rows, i) => (
-          <button key={rows[0].a.id} role="tab" aria-selected={i === sel} className={`cc-face ${i === sel ? 'on' : ''}`} onClick={() => setSel(i)}>
+          <button key={rows[0].a.id} role="tab" aria-selected={i === sel} className={`cc-face ${i === sel ? 'on' : ''}`} style={faceStyle(rows[0].a)} onClick={() => setSel(i)}>
             <span className="cc-face-top">
               <span>{rows.length > 1 ? rows[0].a.name.replace(/\s*(L|\$|US\$|HNL|USD|lempiras|dólares)$/i, '') : rows[0].a.name}</span>
               <span className="cc-face-chip" />

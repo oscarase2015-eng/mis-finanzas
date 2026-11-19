@@ -5,6 +5,7 @@ import { save, softDelete, type Account, type AccountType, type Currency } from 
 import { centsToInput, CURRENCY_NAME, fmt, parseAmount } from '../money';
 import { PALETTE } from '../seed';
 import { AmountInput, Empty, Field, Modal, RateWarning } from '../components/ui';
+import { ColorWheelModal, faceStyle } from '../components/ColorWheel';
 
 export const ACCOUNT_TYPES: { value: AccountType; label: string; icon: string }[] = [
   { value: 'banco', label: 'Cuenta bancaria', icon: '🏦' },
@@ -16,6 +17,7 @@ export const ACCOUNT_TYPES: { value: AccountType; label: string; icon: string }[
 
 export default function Accounts({ s, nav }: { s: Store; nav: Nav }) {
   const [edit, setEdit] = useState<Account | 'new' | null>(null);
+  const [paint, setPaint] = useState<Account | null>(null);
   const [showArchived, setShowArchived] = useState(false);
   const nw = netWorth(s);
   const visible = s.accounts.filter((a) => showArchived || !a.archived);
@@ -66,26 +68,23 @@ export default function Accounts({ s, nav }: { s: Store; nav: Nav }) {
                   const b = s.balances.get(a.id) ?? 0;
                   const isCard = a.type === 'tarjeta';
                   return (
-                    <div key={a.id} className={`acc-face ${a.archived ? 'archived' : ''}`}>
+                    <div key={a.id} className={`acc-face ${a.archived ? 'archived' : ''}`} style={faceStyle(a)}>
                       <div className="acc-face-top">
                         <span className="grow">{a.name}</span>
                         <span className="acc-face-cur">{a.currency === 'HNL' ? 'L' : 'US$'}</span>
-                        <span className="cc-face-chip" style={{ background: a.color }} />
+                        <span className="cc-face-chip" />
                       </div>
-                      <span className="cc-face-label">{isCard ? 'Deuda' : 'Saldo'}{a.archived ? ' · archivada' : ''}</span>
-                      <span className="acc-face-amount">{fmt(isCard ? Math.max(0, -b) : b, a.currency)}</span>
-                      {isCard && a.creditLimit ? (
-                        <span className="acc-face-sub">
-                          Disponible {fmt(a.creditLimit + b, a.currency)} de {fmt(a.creditLimit, a.currency)}
-                        </span>
-                      ) : (
-                        <span className="acc-face-sub">{a.cardLast4 ? `•••• ${a.cardLast4}` : '\u00a0'}</span>
-                      )}
+                      <span className="cc-face-label">
+                        {isCard ? (a.creditLimit ? 'Disponible' : 'Deuda') : 'Saldo'}
+                        {a.archived ? ' · archivada' : ''}
+                      </span>
+                      <span className="acc-face-amount">{fmt(isCard ? (a.creditLimit ? a.creditLimit + b : Math.max(0, -b)) : b, a.currency)}</span>
+                      <span className="acc-face-sub">{a.cardLast4 ? `•••• ${a.cardLast4}` : '\u00a0'}</span>
                       <div className="acc-face-actions">
                         <button onClick={() => nav.go('movimientos', { account: a.id })}>Movimientos</button>
                         <button onClick={() => nav.newTx({ accountId: a.id })}>Anotar</button>
                         <span className="spacer" />
-                        <button onClick={() => setEdit(a)}>Editar</button>
+                        <button onClick={() => setPaint(a)}>Editar</button>
                       </div>
                     </div>
                   );
@@ -102,6 +101,17 @@ export default function Accounts({ s, nav }: { s: Store; nav: Nav }) {
         </label>
       )}
 
+      {paint && (
+        <ColorWheelModal
+          account={paint}
+          also={paint.cardLast4 ? s.accounts.filter((x) => x.id !== paint.id && x.type === paint.type && x.cardLast4 === paint.cardLast4) : []}
+          onClose={() => setPaint(null)}
+          onMore={() => {
+            setEdit(paint);
+            setPaint(null);
+          }}
+        />
+      )}
       {edit && <AccountForm s={s} account={edit === 'new' ? undefined : edit} onClose={() => setEdit(null)} />}
     </div>
   );

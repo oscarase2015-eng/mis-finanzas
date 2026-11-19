@@ -28,6 +28,8 @@ export interface Account extends Base {
   /** Solo tarjetas: día de corte y día límite de pago (1-31) */
   cutDay?: number;
   payDay?: number;
+  /** Color de fondo de la tarjeta en pantalla (por defecto negro) */
+  faceColor?: string;
 }
 
 export interface Category extends Base {

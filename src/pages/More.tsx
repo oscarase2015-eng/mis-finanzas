@@ -66,7 +66,7 @@ export default function More({ s, email, onLogin }: { s: Store; email: string | 
           ))}
         </ul>
       </section>
-      <p className="muted small center">Mis Finanzas · versión 2.0</p>
+      <p className="muted small center">Mis Finanzas · versión 2.1</p>
     </div>
   );
 }
