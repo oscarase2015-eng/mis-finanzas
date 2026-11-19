@@ -458,3 +458,13 @@ h3, .field-label, .day-head, .facts dt, .stat > p.muted:first-child, .hero > div
 .cc-spent-v { display: block; margin: 2px 0; font-weight: 300; font-size: 1.5rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
 @media (min-width: 900px) { .cc-face { flex-basis: 360px; } }
 .cc-face-line { display: flex; flex-direction: column; } .cc-face-line + .cc-face-line .cc-face-label { margin-top: 4px; }
+.cc-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cc-tile { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 16px; }
+.cc-tile .cc-amount { font-size: clamp(1.15rem, 5.2vw, 1.9rem); overflow-wrap: anywhere; }
+.cc-tile .progress { margin: 6px 0 2px; }
+.cc-tile .btn { margin-top: 10px; }
+.cc-tile.due { outline: 1.5px solid var(--accent); outline-offset: -1.5px; }
+.cc-tile.late { background: var(--accent); color: var(--accent-ink); }
+.cc-tile.late * { color: var(--accent-ink) !important; }
+.cc-tile.late .btn.primary { background: #000; border-color: #000; }
+.cc-summary { gap: 8px; }

@@ -178,42 +178,38 @@ function PeriodSummary({ r, showCur, onPay }: { r: { a: Account; st: CardStatus 
   const late = !paid && days < 0;
   const ratio = a.creditLimit ? st.curCharges / a.creditLimit : 0;
   return (
-    <section className="card cc-summary">
+    <section className="cc-summary">
       {showCur && <p className="cc-cur">{a.currency === 'USD' ? 'Dólares' : 'Lempiras'}</p>}
-      <div className={`cc-box ${late ? 'late' : paid ? 'ok' : 'due'}`}>
-        <div className="row">
-          <span className="grow">
-            <span className="muted small block">Por pagar</span>
-            <strong className="cc-amount">{paid ? 'Pagado' : fmt(st.pending, a.currency)}</strong>
-          </span>
+      <div className="cc-pair">
+        <div className={`card cc-tile ${late ? 'late' : paid ? 'ok' : 'due'}`}>
+          <span className="muted small">Por pagar</span>
+          <strong className="cc-amount">{paid ? 'Pagado' : fmt(st.pending, a.currency)}</strong>
+          <span className="muted small">{late ? `Pago ${dueText(days)}` : `Deuda total ${fmt(Math.max(0, st.debt), a.currency)}`}</span>
+          <span className="spacer" />
           {!paid && (
-            <button className="btn primary" onClick={onPay}>
+            <button className="btn primary block" onClick={onPay}>
               Pagar
             </button>
           )}
         </div>
-        {late && <span className="small">Pago {dueText(days)}</span>}
-      </div>
-      <div className="cc-spent">
-        <span className="muted small block">Gastado este periodo · {short(st.cycle.curStart)} al {short(st.cycle.nextCut)}</span>
-        <span className="cc-spent-v">
-          {fmt(st.curCharges, a.currency)}
-          {a.creditLimit ? <span className="muted small"> / {fmt(a.creditLimit, a.currency)}</span> : null}
-        </span>
-        <span className="muted small block">Se paga el {short(st.cycle.nextPayDate)}</span>
-        {a.creditLimit ? (
-          <>
-            <Progress ratio={ratio} />
-            <div className="row small muted">
-              <span className="grow">{Math.round(ratio * 100)}% de tu límite</span>
-              <span>Deuda total {fmt(Math.max(0, st.debt), a.currency)}</span>
-            </div>
-          </>
-        ) : (
-          <p className="small muted" style={{ marginTop: 6 }}>
-            Periodo anterior: {fmt(st.prevCharges, a.currency)} · deuda total {fmt(Math.max(0, st.debt), a.currency)}
-          </p>
-        )}
+        <div className="card cc-tile">
+          <span className="muted small">Gastado este periodo</span>
+          <strong className="cc-amount">{fmt(st.curCharges, a.currency)}</strong>
+          <span className="muted small">
+            {short(st.cycle.curStart)} al {short(st.cycle.nextCut)}
+          </span>
+          <span className="spacer" />
+          {a.creditLimit ? (
+            <>
+              <Progress ratio={ratio} />
+              <span className="muted small">
+                {Math.round(ratio * 100)}% de {fmt(a.creditLimit, a.currency)}
+              </span>
+            </>
+          ) : (
+            <span className="muted small">Anterior: {fmt(st.prevCharges, a.currency)}</span>
+          )}
+        </div>
       </div>
     </section>
   );
