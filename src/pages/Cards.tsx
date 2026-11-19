@@ -183,7 +183,7 @@ function PeriodSummary({ r, showCur, onPay }: { r: { a: Account; st: CardStatus 
       <div className={`cc-box ${late ? 'late' : paid ? 'ok' : 'due'}`}>
         <div className="row">
           <span className="grow">
-            <span className="muted small block">Por pagar · corte del {short(st.cycle.lastCut)}</span>
+            <span className="muted small block">Por pagar</span>
             <strong className="cc-amount">{paid ? 'Pagado' : fmt(st.pending, a.currency)}</strong>
           </span>
           {!paid && (
@@ -192,14 +192,7 @@ function PeriodSummary({ r, showCur, onPay }: { r: { a: Account; st: CardStatus 
             </button>
           )}
         </div>
-        <span className="small">
-          {paid ? (st.statement > 0 ? `Pagaste ${fmt(st.statement, a.currency)} del estado de cuenta` : 'No había saldo al corte') : `Fecha límite ${short(st.cycle.payDate)} · ${dueText(days)}`}
-        </span>
-        {!paid && st.paidSinceCut > 0 && (
-          <span className="muted small">
-            Saldo al corte {fmt(st.statement, a.currency)} · ya pagaste {fmt(st.paidSinceCut, a.currency)}
-          </span>
-        )}
+        {late && <span className="small">Pago {dueText(days)}</span>}
       </div>
       <div className="cc-spent">
         <span className="muted small block">Gastado este periodo · {short(st.cycle.curStart)} al {short(st.cycle.nextCut)}</span>
