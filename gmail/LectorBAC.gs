@@ -97,11 +97,14 @@ function htmlATexto(h) {
 function interpretar(texto, fechaCorreo) {
   const t = texto.replace(/\s+/g, ' ');
   const num = '([\\d.,]+)';
-  const mon = '(USD|US\\$|\\$|HNL|LPS?\\.?|L\\.)';
+  const mon = '(USD|US\\$|\\$|HNL|LPS?\\.?|L\\.?)';
   const base = { source: 'gmail', type: 'gasto', status: 'pendiente', cardLast4: null };
 
   // Formato 1: compra con tarjeta ("BAC Credomatic Informa: VISA 8572 ... Comercio Monto Horario ...")
-  let c = t.match(new RegExp('Horario:?\\s+(.{1,120}?)\\s+' + mon + '\\s*' + num + '\\s+(\\d{4})[/-](\\d{1,2})[/-](\\d{1,2})', 'i'));
+  // a) "Comercio Monto ANTHROPIC* CLAUDE SUB USD 20 Horario 2026/11/19-10:03:02" (formato real de BAC)
+  let c = t.match(new RegExp('Comercio:?\\s+Monto:?\\s+(.{1,120}?)\\s+' + mon + '\\s*' + num + '\\s+Horario:?\\s+(\\d{4})[/-](\\d{1,2})[/-](\\d{1,2})', 'i'));
+  // b) "Comercio Monto Horario ANTHROPIC* CLAUDE SUB USD 20 2026/11/19-10:03:02"
+  if (!c) c = t.match(new RegExp('Horario:?\\s+(.{1,120}?)\\s+' + mon + '\\s*' + num + '\\s+(\\d{4})[/-](\\d{1,2})[/-](\\d{1,2})', 'i'));
   if (c) {
     if (/\b(Rechazad|Denegad|Declinad)/i.test(t)) return 'omitir';
     const tarjeta = t.match(/(?:VISA|MASTERCARD|MASTER CARD|AMEX|AMERICAN EXPRESS)[^\d]{0,15}(\d{4})/i);
