@@ -19,6 +19,13 @@ export default function More({ s, email, onLogin }: { s: Store; email: string | 
     <div className="page">
       <h1>Más</h1>
       <div className="tiles">
+        <a className="card tile" href="#revisar">
+          <span className="tile-icon">📬</span>
+          <span>
+            <strong className="block">Por revisar</strong>
+            <span className="muted small">{s.inbox.length ? `${s.inbox.length} pendientes` : 'Gastos desde Gmail'}</span>
+          </span>
+        </a>
         <a className="card tile" href="#deudas">
           <span className="tile-icon">🤝</span>
           <span>

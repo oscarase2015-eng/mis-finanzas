@@ -23,6 +23,8 @@ export interface Account extends Base {
   archived: 0 | 1;
   /** Solo tarjetas: límite en centavos. */
   creditLimit?: number;
+  /** Últimos 4 dígitos de la tarjeta, para reconocer las notificaciones del banco */
+  cardLast4?: string;
 }
 
 export interface Category extends Base {
@@ -114,6 +116,22 @@ export interface GoalContribution extends Base {
   initial?: boolean;
 }
 
+/** Gasto o ingreso detectado automáticamente (por ejemplo en un correo del banco), pendiente de confirmar */
+export interface InboxItem extends Base {
+  source: string;
+  date: string;
+  /** Centavos, positivo */
+  amount: number;
+  currency: Currency;
+  type: 'gasto' | 'ingreso';
+  merchant: string;
+  cardLast4?: string | null;
+  /** Texto original resumido, para revisar */
+  raw?: string;
+  status: 'pendiente' | 'registrado' | 'descartado';
+  txId?: string | null;
+}
+
 export interface Setting {
   key: string;
   value: unknown;
@@ -132,6 +150,7 @@ export const db = new Dexie('mis-finanzas') as Dexie & {
   debtPayments: EntityTable<DebtPayment, 'id'>;
   goals: EntityTable<Goal, 'id'>;
   goalContributions: EntityTable<GoalContribution, 'id'>;
+  inbox: EntityTable<InboxItem, 'id'>;
 };
 
 db.version(1).stores({
@@ -150,6 +169,10 @@ db.version(2).stores({
   goalContributions: 'id, goalId, date, deleted, updatedAt',
 });
 
+db.version(3).stores({
+  inbox: 'id, status, date, deleted, updatedAt',
+});
+
 export const uid = () =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()
@@ -161,7 +184,7 @@ export function stamp<T extends object>(obj: T): T & Base {
   return { ...obj, id: o.id || uid(), createdAt: now, updatedAt: now, deleted: 0 } as T & Base;
 }
 
-type Table = 'accounts' | 'categories' | 'transactions' | 'budgets' | 'rates' | 'debts' | 'debtPayments' | 'goals' | 'goalContributions';
+type Table = 'accounts' | 'categories' | 'transactions' | 'budgets' | 'rates' | 'debts' | 'debtPayments' | 'goals' | 'goalContributions' | 'inbox';
 
 export async function save<T extends Base>(table: Table, obj: Partial<T> & { id?: string }) {
   const t = db[table] as unknown as EntityTable<Base, 'id'>;
@@ -189,5 +212,5 @@ export async function setSetting(key: string, value: unknown) {
 }
 
 /** Tablas que se sincronizan con la nube */
-export const SYNC_TABLES = ['accounts', 'categories', 'transactions', 'budgets', 'rates', 'settings', 'debts', 'debtPayments', 'goals', 'goalContributions'] as const;
+export const SYNC_TABLES = ['accounts', 'categories', 'transactions', 'budgets', 'rates', 'settings', 'debts', 'debtPayments', 'goals', 'goalContributions', 'inbox'] as const;
 export type SyncTable = (typeof SYNC_TABLES)[number];

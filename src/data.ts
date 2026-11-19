@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, type Account, type Budget, type Category, type Currency, type Debt, type DebtPayment, type Goal, type GoalContribution, type Rate, type Transaction } from './db';
+import { db, type Account, type Budget, type Category, type Currency, type Debt, type DebtPayment, type Goal, type GoalContribution, type InboxItem, type Rate, type Transaction } from './db';
 import { convert } from './money';
 
 export interface Store {
@@ -18,10 +18,13 @@ export interface Store {
   debtPayments: DebtPayment[];
   goals: Goal[];
   goalContributions: GoalContribution[];
+  inbox: InboxItem[];
+  merchantCats: Record<string, string>;
 }
 
 export function useStore(): Store {
   const data = useLiveQuery(async () => {
+    const [inbox, merchantS] = await Promise.all([db.inbox.where('status').equals('pendiente').toArray(), db.settings.get('merchantCats')]);
     const [debts, debtPayments, goals, goalContributions] = await Promise.all([
       db.debts.where('deleted').equals(0).toArray(),
       db.debtPayments.where('deleted').equals(0).toArray(),
@@ -36,7 +39,7 @@ export function useStore(): Store {
       db.rates.where('deleted').equals(0).toArray(),
       db.settings.get('mainCurrency'),
     ]);
-    return { accounts, categories, txs, budgets, rates, main: (mainS?.value as Currency) ?? 'HNL', debts, debtPayments, goals, goalContributions };
+    return { accounts, categories, txs, budgets, rates, main: (mainS?.value as Currency) ?? 'HNL', debts, debtPayments, goals, goalContributions, inbox: inbox.filter((i) => !i.deleted), merchantCats: (merchantS?.value as Record<string, string>) ?? {} };
   }, []);
 
   const accounts = data?.accounts ?? [];
@@ -69,6 +72,8 @@ export function useStore(): Store {
     debts: (data?.debts ?? []).sort((a, b) => a.name.localeCompare(b.name, 'es')),
     debtPayments: (data?.debtPayments ?? []).sort((a, b) => (a.date === b.date ? b.createdAt - a.createdAt : a.date < b.date ? 1 : -1)),
     goals: (data?.goals ?? []).sort((a, b) => a.createdAt - b.createdAt),
+    inbox: (data?.inbox ?? []).sort((a, b) => (a.date === b.date ? b.createdAt - a.createdAt : a.date < b.date ? 1 : -1)),
+    merchantCats: data?.merchantCats ?? {},
     goalContributions: (data?.goalContributions ?? []).sort((a, b) => (a.date === b.date ? b.createdAt - a.createdAt : a.date < b.date ? 1 : -1)),
   };
 }
@@ -196,3 +201,15 @@ export function catFamily(s: Store, id: string) {
   for (const c of s.categories) if (c.parentId === id) ids.add(c.id);
   return ids;
 }
+
+
+/** Normaliza el nombre de un comercio para recordar su categoría */
+export const merchantKey = (m: string) =>
+  m
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]+/g, ' ')
+    .replace(/\b\d+\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();

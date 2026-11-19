@@ -60,6 +60,11 @@ export default function Dashboard({ s, nav }: { s: Store; nav: Nav }) {
     <div className="page">
       <h1>Inicio</h1>
       <RateWarning s={s} />
+      {s.inbox.length > 0 && (
+        <a className="notice inbox-banner" href="#revisar">
+          📬 Tienes <strong>{s.inbox.length}</strong> {s.inbox.length === 1 ? 'gasto' : 'gastos'} de tu banco por revisar. Toca para confirmarlos.
+        </a>
+      )}
 
       <section className="card hero">
         <div>

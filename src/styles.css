@@ -300,3 +300,12 @@ details summary { cursor: pointer; margin-top: 6px; }
 .tile { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
 .tile:hover { background: var(--hover); }
 .tile-icon { font-size: 1.6rem; }
+
+/* Bandeja por revisar */
+.inbox-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+@media (min-width: 900px) { .inbox-list { grid-template-columns: 1fr 1fr; } }
+.inbox-item { display: flex; flex-direction: column; gap: 10px; }
+.inbox-fields { display: grid; gap: 8px; }
+.raw { white-space: pre-wrap; color: var(--muted); }
+.inbox-banner { display: block; text-decoration: none; color: inherit; background: color-mix(in srgb, var(--primary) 12%, var(--surface)); border-color: color-mix(in srgb, var(--primary) 40%, transparent); }
+.count { margin-left: auto; background: var(--primary); color: var(--primary-ink); border-radius: 99px; font-size: 0.75rem; padding: 1px 8px; font-weight: 700; }

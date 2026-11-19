@@ -116,6 +116,7 @@ function AccountForm({ s, account, onClose }: { s: Store; account?: Account; onC
   const [initial, setInitial] = useState(account ? centsToInput(isCard ? -account.initialBalance : account.initialBalance) : '');
   const [limit, setLimit] = useState(account?.creditLimit ? centsToInput(account.creditLimit) : '');
   const [color, setColor] = useState(account?.color ?? PALETTE[s.accounts.length % PALETTE.length]);
+  const [card, setCard] = useState(account?.cardLast4 ?? '');
   const [error, setError] = useState('');
   const used = account ? s.txs.some((t) => t.accountId === account.id || t.toAccountId === account.id) : false;
 
@@ -131,6 +132,7 @@ function AccountForm({ s, account, onClose }: { s: Store; account?: Account; onC
       initialBalance: isCard ? -ini : ini,
       creditLimit: isCard ? parseAmount(limit) ?? undefined : undefined,
       color,
+      cardLast4: card.replace(/\D/g, '').slice(-4) || undefined,
       archived: account?.archived ?? 0,
     });
     onClose();
@@ -208,6 +210,11 @@ function AccountForm({ s, account, onClose }: { s: Store; account?: Account; onC
         {isCard && (
           <Field label="Límite de crédito">
             <AmountInput value={limit} onChange={setLimit} currency={currency} />
+          </Field>
+        )}
+        {(type === 'tarjeta' || type === 'banco') && (
+          <Field label="Últimos 4 dígitos de la tarjeta (opcional)" hint="Sirve para asignar a esta cuenta los gastos que llegan por correo.">
+            <input inputMode="numeric" maxLength={4} value={card} onChange={(e) => setCard(e.target.value)} placeholder="Ej.: 4821" />
           </Field>
         )}
         <Field label="Color">
