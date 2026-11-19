@@ -428,3 +428,33 @@ h3, .field-label, .day-head, .facts dt, .stat > p.muted:first-child, .hero > div
 .card { border: 1px solid var(--line); }
 .stats .stat:nth-child(2) { border-color: var(--accent); }
 .hero.card { border: 0; }
+
+/* Mis tarjetas: carrusel, acciones, resumen */
+.cc-carousel { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 2px 6px; margin: 0 -2px; scrollbar-width: none; }
+.cc-carousel::-webkit-scrollbar { display: none; }
+.cc-face {
+  flex: 0 0 min(88%, 360px); scroll-snap-align: start; aspect-ratio: 1.62; text-align: left; cursor: pointer;
+  display: flex; flex-direction: column; gap: 2px; padding: 18px 20px; border-radius: 22px; border: 0;
+  background: #000; color: #f2f2f4; opacity: 0.55; transition: opacity 0.2s, transform 0.2s;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1.4px); background-size: 8px 8px;
+}
+.cc-face.on { opacity: 1; }
+.cc-face-top { display: flex; justify-content: space-between; align-items: center; font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: auto; }
+.cc-face-chip { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
+.cc-face-label { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #9a9ba1; margin-top: 10px; }
+.cc-face-amount { font-family: var(--dot); font-weight: 800; font-size: clamp(1.4rem, 6.5vw, 1.9rem); line-height: 1.1; }
+.cc-face-num { font-family: var(--mono); font-size: 0.85rem; letter-spacing: 0.12em; color: #c9cad0; margin-top: 8px; }
+.cc-face-foot { display: flex; gap: 28px; margin-top: 8px; font-size: 0.9rem; }
+.cc-face-foot small { display: block; font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: #9a9ba1; }
+.cc-dots { display: flex; justify-content: center; gap: 6px; margin-top: -4px; }
+.cc-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--line); }
+.cc-dots span.on { background: var(--text); }
+.cc-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.cc-actions .card { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 4px; cursor: pointer; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.03em; color: var(--text); }
+.cc-actions .card:hover { background: var(--hover); }
+.cc-act-icon { font-size: 1.3rem; line-height: 1; font-family: var(--font); }
+.cc-summary { display: flex; flex-direction: column; gap: 14px; }
+.cc-summary .cc-cur { margin: 0; }
+.cc-spent-v { display: block; margin: 2px 0; font-weight: 300; font-size: 1.5rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (min-width: 900px) { .cc-face { flex-basis: 360px; } }
+.cc-face-line { display: flex; flex-direction: column; } .cc-face-line + .cc-face-line .cc-face-label { margin-top: 4px; }
