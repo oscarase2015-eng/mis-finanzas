@@ -205,7 +205,7 @@ function PeriodSummary({ r, showCur, onPay }: { r: { a: Account; st: CardStatus 
             <>
               <Progress ratio={ratio} />
               <span className="muted small">
-                {Math.round(ratio * 100)}% de {fmt(a.creditLimit, a.currency)}
+                Límite {fmt(a.creditLimit, a.currency)}
               </span>
             </>
           ) : (

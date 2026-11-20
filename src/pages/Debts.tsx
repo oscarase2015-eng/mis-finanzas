@@ -109,10 +109,6 @@ function DebtCard({ d, st, onClick }: { d: Debt; st: ReturnType<typeof debtStatu
       <p className={`big ${st.done ? 'pos' : ''}`}>{st.done ? 'Pagada' : fmt(st.left, d.currency)}</p>
       <p className="muted small">{st.done ? `Total pagado ${fmt(st.paid, d.currency)}` : `falta de ${fmt(d.total, d.currency)}`}</p>
       <Progress ratio={st.ratio} good />
-      <div className="row small">
-        <span className="grow muted">Abonado <b className="ink">{fmt(st.paid, d.currency)}</b></span>
-        <strong>{Math.round(st.ratio * 100)} %</strong>
-      </div>
       {st.last && <p className="muted small">Último abono: {shortDate(st.last.date)}</p>}
     </div>
   );
@@ -153,20 +149,12 @@ function DebtDetail({ s, debt, onBack }: { s: Store; debt: Debt; onBack: () => v
             <p className="muted">{st.done ? 'Deuda pagada' : debt.direction === 'debo' ? 'Te falta pagar' : 'Te falta cobrar'}</p>
             <p className={`big ${st.done ? 'pos' : debt.direction === 'debo' ? 'neg' : ''}`}>{fmt(st.left, debt.currency)}</p>
           </div>
-          <div className="right">
-            <p className="muted">Progreso</p>
-            <p className="big">{Math.round(st.ratio * 100)} %</p>
-          </div>
         </div>
         <Progress ratio={st.ratio} good />
         <dl className="facts">
           <div>
             <dt>Monto total</dt>
             <dd>{fmt(debt.total, debt.currency)}</dd>
-          </div>
-          <div>
-            <dt>{debt.direction === 'debo' ? 'Abonado' : 'Cobrado'}</dt>
-            <dd className="pos">{fmt(st.paid, debt.currency)}</dd>
           </div>
           <div>
             <dt>{debt.direction === 'debo' ? 'Acreedor' : 'Deudor'}</dt>

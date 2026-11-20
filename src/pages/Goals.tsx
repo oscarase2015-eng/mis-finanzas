@@ -112,12 +112,11 @@ function GoalCard({ g, st, onClick }: { g: Goal; st: ReturnType<typeof goalStatu
           <Glyph name={g.icon} />
         </span>
         <strong className="grow">{g.name}</strong>
-        <strong>{Math.round(st.ratio * 100)} %</strong>
       </div>
       <p className="big">{fmt(st.saved, g.currency)}</p>
-      <p className="muted small">de {fmt(g.target, g.currency)}</p>
+      <p className="muted small">Meta {fmt(g.target, g.currency)}</p>
       <Progress ratio={st.ratio} good />
-      <p className="small">{st.done ? <span className="pos">¡Objetivo alcanzado!</span> : <>Faltan <b>{fmt(st.left, g.currency)}</b></>}</p>
+      {st.done && <p className="small pos">¡Objetivo alcanzado!</p>}
       {!st.done && st.neededPerMonth ? (
         <p className="muted small">
           Para el {shortDate(g.targetDate!)}: {fmt(st.neededPerMonth, g.currency)} / mes
@@ -163,20 +162,12 @@ function GoalDetail({ s, goal, onBack }: { s: Store; goal: Goal; onBack: () => v
             <p className="muted">Ahorrado</p>
             <p className="big pos">{fmt(st.saved, goal.currency)}</p>
           </div>
-          <div className="right">
-            <p className="muted">Progreso</p>
-            <p className="big">{Math.round(st.ratio * 100)} %</p>
-          </div>
         </div>
         <Progress ratio={st.ratio} good />
         <dl className="facts">
           <div>
             <dt>Meta</dt>
             <dd>{fmt(goal.target, goal.currency)}</dd>
-          </div>
-          <div>
-            <dt>Falta</dt>
-            <dd>{fmt(st.left, goal.currency)}</dd>
           </div>
           <div>
             <dt>Ritmo actual</dt>

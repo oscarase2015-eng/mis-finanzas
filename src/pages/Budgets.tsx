@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { catFamily, expenseByRoot, type Store } from '../data';
 import { save, softDelete, type Budget, type Currency } from '../db';
-import { monthOf, quincenaOf, shiftPeriod, today, type Period } from '../dates';
+import { monthOf, shiftPeriod, today, type Period } from '../dates';
 import { centsToInput, convert, fmt, parseAmount } from '../money';
 import { AmountInput, CategorySelect, Empty, Field, Modal, Progress, RateWarning } from '../components/ui';
 import { Glyph } from '../components/Icons';
@@ -22,13 +22,11 @@ export function catBudgetSpent(s: Store, b: Budget, p: { start: string; end: str
 export default function Budgets({ s }: { s: Store }) {
   const [month, setMonth] = useState<Period>(() => monthOf(today()));
   const [edit, setEdit] = useState<Budget | 'new' | null>(null);
-  const q1 = quincenaOf(month.start);
-  const q2 = quincenaOf(`${month.start.slice(0, 8)}15`);
 
   const rows = s.budgets
     .map((b) => {
       const spent = catBudgetSpent(s, b, month);
-      return { b, spent, s1: catBudgetSpent(s, b, q1), s2: catBudgetSpent(s, b, q2), ratio: b.amount ? spent / b.amount : 0 };
+      return { b, spent, ratio: b.amount ? spent / b.amount : 0 };
     })
     .sort((a, b) => (s.catById.get(a.b.categoryId)?.name ?? '').localeCompare(s.catById.get(b.b.categoryId)?.name ?? '', 'es'));
 
@@ -42,10 +40,6 @@ export default function Budgets({ s }: { s: Store }) {
   const budgeted = new Set(s.budgets.map((b) => b.categoryId));
   const unbudgeted = [...expenseByRoot(s, month.start, month.end).entries()].filter(([id]) => !budgeted.has(id));
 
-  // Ritmo esperado: qué fracción del mes ha pasado
-  const t = today();
-  const isCurrent = t >= month.start && t <= month.end;
-  const dayFrac = isCurrent ? Number(t.slice(8, 10)) / Number(month.end.slice(8, 10)) : null;
 
   return (
     <div className="page">
@@ -80,21 +74,18 @@ export default function Budgets({ s }: { s: Store }) {
             <div className="row">
               <span className="grow">
                 <strong className="block">Total presupuestado</strong>
-                <span className="muted small">
-                  {fmt(totalSpent, s.main)} de {fmt(totalBudget, s.main)}
-                </span>
+                <span className="muted small">Límite {fmt(totalBudget, s.main)}</span>
               </span>
               <span className="right-col">
-                <span className="muted small block">{totalSpent > totalBudget ? 'Excedido' : 'Quedan'}</span>
-                <b className={`key-amt ${totalSpent > totalBudget ? 'neg' : 'pos'}`}>{fmt(Math.abs(totalBudget - totalSpent), s.main)}</b>
+                <b className={`key-amt ${totalSpent > totalBudget ? 'neg' : ''}`}>{fmt(Math.abs(totalBudget - totalSpent), s.main)}</b>
+                <span className="muted small block">{totalSpent > totalBudget ? 'excedido' : 'disponible'}</span>
               </span>
             </div>
             <Progress ratio={totalBudget ? totalSpent / totalBudget : 0} />
-            {dayFrac !== null && <p className="muted small">Ha pasado el {Math.round(dayFrac * 100)} % del mes.</p>}
           </section>
 
           <ul className="budget-list">
-            {rows.map(({ b, spent, s1, s2, ratio }) => {
+            {rows.map(({ b, spent, ratio }) => {
               const c = s.catById.get(b.categoryId);
               const left = b.amount - spent;
               return (
@@ -105,20 +96,14 @@ export default function Budgets({ s }: { s: Store }) {
                     </span>
                     <span className="grow">
                       <strong>{c?.name ?? 'Categoría eliminada'}</strong>
-                      <span className="muted small block">
-                        Gastado {fmt(spent, b.currency)} de {fmt(b.amount, b.currency)}
-                      </span>
+                      <span className="muted small block">Límite {fmt(b.amount, b.currency)}</span>
                     </span>
                     <span className="right-col">
-                      <span className="muted small block">{ratio >= 1 ? 'Excedido' : 'Quedan'}</span>
                       <b className={`key-amt ${ratio >= 1 ? 'neg' : ratio >= 0.8 ? 'warn-text' : ''}`}>{fmt(ratio >= 1 ? -left : left, b.currency)}</b>
-                      <span className="block muted small">{Math.round(ratio * 100)} % usado</span>
+                      <span className="muted small block">{ratio >= 1 ? 'excedido' : 'disponible'}</span>
                     </span>
                   </div>
                   <Progress ratio={ratio} />
-                  <p className="muted small">
-                    1.ª quincena: {fmt(s1, b.currency)} · 2.ª quincena: {fmt(s2, b.currency)}
-                  </p>
                 </li>
               );
             })}
