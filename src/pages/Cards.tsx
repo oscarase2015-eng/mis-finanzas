@@ -7,6 +7,7 @@ import { shortDate, today } from '../dates';
 import { centsToInput, fmt, parseAmount } from '../money';
 import { AmountInput, Empty, Field, Modal, Progress, Segmented } from '../components/ui';
 import { faceStyle } from '../components/ColorWheel';
+import { Glyph } from '../components/Icons';
 
 export function cardAlerts(s: Store) {
   const d = today();
@@ -117,16 +118,16 @@ export default function Cards({ s, nav }: { s: Store; nav: Nav }) {
       {/* 2. Acciones rápidas */}
       <div className="cc-actions">
         <button className="card" onClick={() => pay(main)}>
-          <span className="cc-act-icon">↓</span>Pagar
+          <span className="cc-act-icon"><Glyph name="down" /></span>Pagar
         </button>
         <button className="card" onClick={() => nav.newTx({ type: 'gasto', accountId: g[0].a.id })}>
-          <span className="cc-act-icon">＋</span>Gasto
+          <span className="cc-act-icon"><Glyph name="plus" /></span>Gasto
         </button>
         <button className="card" onClick={() => nav.go('movimientos', { account: g[0].a.id })}>
-          <span className="cc-act-icon">≡</span>Movimientos
+          <span className="cc-act-icon"><Glyph name="list" /></span>Movimientos
         </button>
         <button className="card" onClick={() => setSettings(g[0].a)}>
-          <span className="cc-act-icon">⚙</span>Ajustes
+          <span className="cc-act-icon"><Glyph name="gear" /></span>Ajustes
         </button>
       </div>
 
@@ -231,7 +232,7 @@ function TxList({ s, rows, period, nav }: { s: Store; rows: Row[]; period: 'actu
         return (
           <li key={t.id} className="row clickable" onClick={() => nav.editTx(t)}>
             <span className="tx-icon" style={{ background: 'var(--hover)' }}>
-              {cat?.icon ?? (out ? '💳' : '↓')}
+              <Glyph name={cat?.icon ?? (out ? 'card' : 'down')} />
             </span>
             <span className="grow tx-text">
               <span className="tx-title">{label}</span>

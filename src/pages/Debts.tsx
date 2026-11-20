@@ -65,7 +65,7 @@ export default function Debts({ s }: { s: Store }) {
               <DebtCard key={d.id} d={d} st={st} onClick={() => setOpenId(d.id)} />
             ))}
           </div>
-          {active.length === 0 && <p className="muted">No tienes deudas pendientes. 🎉</p>}
+          {active.length === 0 && <p className="muted">No tienes deudas pendientes.</p>}
 
           {done.length > 0 && (
             <>
@@ -110,7 +110,7 @@ function DebtCard({ d, st, onClick }: { d: Debt; st: ReturnType<typeof debtStatu
       <p className="muted small">{st.done ? `Total pagado ${fmt(st.paid, d.currency)}` : `falta de ${fmt(d.total, d.currency)}`}</p>
       <Progress ratio={st.ratio} good />
       <div className="row small">
-        <span className="grow muted">Abonado {fmt(st.paid, d.currency)}</span>
+        <span className="grow muted">Abonado <b className="ink">{fmt(st.paid, d.currency)}</b></span>
         <strong>{Math.round(st.ratio * 100)} %</strong>
       </div>
       {st.last && <p className="muted small">Último abono: {shortDate(st.last.date)}</p>}

@@ -10,6 +10,7 @@ const todayLabel = () => new Date().toLocaleDateString('es-HN', { weekday: 'shor
 import { fmt, fmtShort } from '../money';
 import { Empty, PeriodNav, Progress, RateWarning } from '../components/ui';
 import TxRow from '../components/TxRow';
+import { Glyph } from '../components/Icons';
 
 export default function Dashboard({ s, nav }: { s: Store; nav: Nav }) {
   const [period, setPeriod] = useState<Period>(() => quincenaOf(today()));
@@ -65,12 +66,12 @@ export default function Dashboard({ s, nav }: { s: Store; nav: Nav }) {
       <RateWarning s={s} />
       {cardAlerts(s).map(({ acc, st, days }) => (
         <a key={acc.id} className={`notice inbox-banner ${days < 0 ? 'late' : ''}`} href="#tarjetas">
-          💳 {days < 0 ? 'Pago vencido' : 'Pago de tarjeta'}: <strong>{fmt(st.pending, acc.currency)}</strong> de {acc.name}, {days > 1 ? `vence en ${days} días` : days === 1 ? 'vence mañana' : days === 0 ? 'vence hoy' : `venció hace ${-days} días`} ({shortDate(st.cycle.payDate)}).
+          <Glyph name="card" size={18} /> <span>{days < 0 ? 'Pago vencido' : 'Pago de tarjeta'}: <strong>{fmt(st.pending, acc.currency)}</strong> de {acc.name}, {days > 1 ? `vence en ${days} días` : days === 1 ? 'vence mañana' : days === 0 ? 'vence hoy' : `venció hace ${-days} días`} ({shortDate(st.cycle.payDate)}).</span>
         </a>
       ))}
       {s.inbox.length > 0 && (
         <a className="notice inbox-banner" href="#revisar">
-          📬 Tienes <strong>{s.inbox.length}</strong> {s.inbox.length === 1 ? 'gasto' : 'gastos'} de tu banco por revisar. Toca para confirmarlos.
+          <Glyph name="inbox" size={18} /> <span>Tienes <strong>{s.inbox.length}</strong> {s.inbox.length === 1 ? 'gasto' : 'gastos'} de tu banco por revisar. Toca para confirmarlos.</span>
         </a>
       )}
 
@@ -87,7 +88,7 @@ export default function Dashboard({ s, nav }: { s: Store; nav: Nav }) {
             <p className="small hero-debt">
               {dt.owe > 0 && (
                 <>
-                  Deudas pendientes: <span className="neg">{fmt(dt.owe, s.main)}</span> ·{' '}
+                  Deudas pendientes: <strong className="neg">{fmt(dt.owe, s.main)}</strong> ·{' '}
                 </>
               )}
               Patrimonio neto: <strong>{fmt(nw.total - dt.owe + dt.owed, s.main)}</strong>
@@ -177,7 +178,7 @@ export default function Dashboard({ s, nav }: { s: Store; nav: Nav }) {
                   <li key={a.id} className="row clickable" onClick={() => nav.go('movimientos', { account: a.id })}>
                     <span className="dot" style={{ background: a.color }} />
                     <span className="grow">{a.name}</span>
-                    <span className={b < 0 ? 'neg' : ''}>{fmt(b, a.currency)}</span>
+                    <b className={b < 0 ? 'neg' : ''}>{fmt(b, a.currency)}</b>
                   </li>
                 );
               })}
@@ -198,9 +199,9 @@ export default function Dashboard({ s, nav }: { s: Store; nav: Nav }) {
               {budgetRows.map(({ b, spent, ratio }) => (
                 <li key={b.id} className="budget-mini">
                   <div className="row">
-                    <span className="grow">{s.catById.get(b.categoryId)?.name}</span>
-                    <span className="small">
-                      {fmt(spent, b.currency)} / {fmt(b.amount, b.currency)}
+                    <strong className="grow">{s.catById.get(b.categoryId)?.name}</strong>
+                    <span className="amt-of">
+                      <b className={spent > b.amount ? 'neg' : ''}>{fmt(spent, b.currency)}</b> <span className="muted small">/ {fmt(b.amount, b.currency)}</span>
                     </span>
                   </div>
                   <Progress ratio={ratio} />
@@ -227,10 +228,10 @@ export default function Dashboard({ s, nav }: { s: Store; nav: Nav }) {
                 {goalRows.map(({ g, st }) => (
                   <li key={g.id} className="budget-mini">
                     <div className="row">
-                      <span>{g.icon}</span>
-                      <span className="grow">{g.name}</span>
-                      <span className="small">
-                        {fmt(st.saved, g.currency)} / {fmt(g.target, g.currency)}
+                      <Glyph name={g.icon} size={18} />
+                      <strong className="grow">{g.name}</strong>
+                      <span className="amt-of">
+                        <b>{fmt(st.saved, g.currency)}</b> <span className="muted small">/ {fmt(g.target, g.currency)}</span>
                       </span>
                     </div>
                     <Progress ratio={st.ratio} good />
@@ -253,8 +254,10 @@ export default function Dashboard({ s, nav }: { s: Store; nav: Nav }) {
                 {debtRows.map(({ d, st }) => (
                   <li key={d.id} className="budget-mini">
                     <div className="row">
-                      <span className="grow">{d.name}</span>
-                      <span className="small">Falta {fmt(st.left, d.currency)}</span>
+                      <strong className="grow">{d.name}</strong>
+                      <span className="amt-of">
+                        <span className="muted small">Falta </span><b>{fmt(st.left, d.currency)}</b>
+                      </span>
                     </div>
                     <Progress ratio={st.ratio} good />
                   </li>

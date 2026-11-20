@@ -9,11 +9,12 @@ import { PALETTE } from '../seed';
 import { applyTheme, getTheme, type Theme } from '../theme';
 import { Field, Modal, Segmented } from '../components/ui';
 import { AccountCard } from '../components/Auth';
+import { Glyph, GlyphPicker } from '../components/Icons';
 
 const SOON = [
-  ['📈', 'Inversiones'],
-  ['🔁', 'Pagos recurrentes y recordatorios'],
-  ['📊', 'Reportes y exportar a Excel'],
+  ['trend', 'Inversiones'],
+  ['repeat', 'Pagos recurrentes y recordatorios'],
+  ['chart', 'Reportes y exportar a Excel'],
 ];
 
 export default function More({ s, email, onLogin }: { s: Store; email: string | null; onLogin: () => void }) {
@@ -22,28 +23,28 @@ export default function More({ s, email, onLogin }: { s: Store; email: string | 
       <h1>Más</h1>
       <div className="tiles">
         <a className="card tile" href="#tarjetas">
-          <span className="tile-icon">💳</span>
+          <span className="tile-icon"><Glyph name="card" size={22} /></span>
           <span>
             <strong className="block">Tarjetas</strong>
             <span className="muted small">Corte, pago y gasto del periodo</span>
           </span>
         </a>
         <a className="card tile" href="#revisar">
-          <span className="tile-icon">📬</span>
+          <span className="tile-icon"><Glyph name="inbox" size={22} /></span>
           <span>
             <strong className="block">Por revisar</strong>
             <span className="muted small">{s.inbox.length ? `${s.inbox.length} pendientes` : 'Gastos desde Gmail'}</span>
           </span>
         </a>
         <a className="card tile" href="#deudas">
-          <span className="tile-icon">🤝</span>
+          <span className="tile-icon"><Glyph name="handshake" size={22} /></span>
           <span>
             <strong className="block">Deudas</strong>
             <span className="muted small">{s.debts.length ? `${s.debts.length} registradas` : 'Lo que debes y te deben'}</span>
           </span>
         </a>
         <a className="card tile" href="#objetivos">
-          <span className="tile-icon">🎯</span>
+          <span className="tile-icon"><Glyph name="target" size={22} /></span>
           <span>
             <strong className="block">Objetivos</strong>
             <span className="muted small">{s.goals.length ? `${s.goals.filter((g) => !g.archived).length} activos` : 'Ahorra para tus metas'}</span>
@@ -60,13 +61,13 @@ export default function More({ s, email, onLogin }: { s: Store; email: string | 
         <ul className="list">
           {SOON.map(([i, t]) => (
             <li key={t} className="row muted">
-              <span>{i}</span>
+              <Glyph name={i} size={18} />
               <span className="grow">{t}</span>
             </li>
           ))}
         </ul>
       </section>
-      <p className="muted small center">Mis Finanzas · versión 2.1</p>
+      <p className="muted small center">Mis Finanzas · versión 2.2</p>
     </div>
   );
 }
@@ -197,7 +198,7 @@ function CategoriesCard({ s }: { s: Store }) {
           <li key={r.id}>
             <div className="row clickable" onClick={() => setEdit({ cat: r, parentId: null })}>
               <span className="dot" style={{ background: r.color }} />
-              <span>{r.icon}</span>
+              <Glyph name={r.icon} size={18} />
               <strong className="grow">{r.name}</strong>
               <button
                 className="link"
@@ -229,7 +230,7 @@ function CategoriesCard({ s }: { s: Store }) {
 function CategoryForm({ s, kind, cat, parentId, onClose }: { s: Store; kind: CatKind; cat?: Category; parentId: string | null; onClose: () => void }) {
   const parent = parentId ? s.catById.get(parentId) : undefined;
   const [name, setName] = useState(cat?.name ?? '');
-  const [icon, setIcon] = useState(cat?.icon ?? parent?.icon ?? '📁');
+  const [icon, setIcon] = useState(cat?.icon ?? parent?.icon ?? 'tag');
   const [color, setColor] = useState(cat?.color ?? parent?.color ?? PALETTE[0]);
   const [err, setErr] = useState('');
   const submit = async () => {
@@ -291,8 +292,8 @@ function CategoryForm({ s, kind, cat, parentId, onClose }: { s: Store; kind: Cat
         </Field>
         {!parentId && (
           <>
-            <Field label="Ícono (un emoji)">
-              <input value={icon} onChange={(e) => setIcon(e.target.value)} maxLength={4} />
+            <Field label="Ícono">
+              <GlyphPicker value={icon} onChange={setIcon} />
             </Field>
             <Field label="Color">
               <div className="swatches">

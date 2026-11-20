@@ -502,3 +502,45 @@ h3, .field-label, .day-head, .facts dt, .stat > p.muted:first-child, .hero > div
 .cw-range::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 2px solid #000; }
 .cw-presets { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; justify-content: center; }
 .cw-hex { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); margin-left: 6px; }
+
+/* ===== Íconos de línea y jerarquía de textos (v2.2) =====
+   Regla: lo principal (nombre, monto) va en negrita y más grande; lo secundario, pequeño y gris. */
+.glyph { display: block; flex: none; }
+.tx-icon { background: var(--panel) !important; color: var(--text); font-size: 0; }
+.tile-icon { filter: none; width: 44px; height: 44px; border-radius: 50%; background: var(--panel); display: grid; place-items: center; flex: none; }
+.cc-act-icon { display: grid; place-items: center; }
+.icon-pick button { display: grid; place-items: center; color: var(--text); border-radius: 50%; }
+.icon-pick button.on { background: var(--primary); color: var(--primary-ink); outline: 0; }
+.notice { display: flex; gap: 10px; align-items: flex-start; }
+.notice .glyph { margin-top: 1px; }
+.notice strong { font-weight: 700; font-size: 1.08em; }
+.cat-tree .row .glyph { color: var(--text); }
+.list .row.muted .glyph { opacity: 0.6; }
+
+/* Filas de movimientos: comercio y monto mandan */
+.tx-title { font-size: 1rem; font-weight: 600; color: var(--text); }
+.tx-text .small, .tx-text .muted { font-size: 0.78rem; }
+.tx-amount { font-weight: 600; font-size: 1.02rem; }
+.tx-amount .small { font-weight: 400; }
+
+/* Cifras clave */
+.big { font-weight: 600; }
+.stat-v { font-weight: 600; font-size: 1.5rem; }
+.cc-amount, .cc-spent-v { font-weight: 600; }
+.facts dd { font-weight: 600; }
+.stats .stat > p.muted:first-child { margin-bottom: 2px; }
+.legend { font-weight: 400; }
+.legend li > span:nth-child(3) { font-weight: 600; }
+.list .row b, .amt-of b { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.amt-of { white-space: nowrap; }
+.budget-mini .row strong { font-weight: 600; }
+.right-col { text-align: right; white-space: nowrap; }
+.key-amt { display: block; font-size: 1.2rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.goal > .row strong { font-size: 1.05rem; }
+.goal .small b, .ink { color: var(--text); font-weight: 600; }
+.tile strong.block { font-size: 1.05rem; font-weight: 600; }
+.inbox-item strong.block { font-size: 1.05rem; }
+.hero .muted.small { font-size: 0.82rem; }
+.hero-debt strong { font-size: 1.05em; }
+.cc-face-amount, .acc-face-amount { letter-spacing: 0.01em; }
+.acc-face-top .grow { font-weight: 600; }

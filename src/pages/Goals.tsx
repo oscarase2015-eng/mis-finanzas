@@ -5,8 +5,8 @@ import { shortDate, today } from '../dates';
 import { centsToInput, convert, fmt, parseAmount } from '../money';
 import { PALETTE } from '../seed';
 import { AmountInput, Empty, Field, Modal, Progress, Segmented } from '../components/ui';
+import { Glyph, GlyphPicker } from '../components/Icons';
 
-const ICONS = ['🎯', '🏠', '🚗', '✈️', '🎓', '💍', '🛟', '💻', '📱', '👶', '🏖️', '🎁', '🏥', '🐷'];
 
 function months(n: number) {
   if (n < 1) return 'menos de 1 mes';
@@ -109,7 +109,7 @@ function GoalCard({ g, st, onClick }: { g: Goal; st: ReturnType<typeof goalStatu
     <div className={`card goal clickable ${g.archived ? 'archived' : ''}`} onClick={onClick} style={{ borderTopColor: g.color }}>
       <div className="row">
         <span className="tx-icon" style={{ background: `${g.color}22` }}>
-          {g.icon}
+          <Glyph name={g.icon} />
         </span>
         <strong className="grow">{g.name}</strong>
         <strong>{Math.round(st.ratio * 100)} %</strong>
@@ -117,7 +117,7 @@ function GoalCard({ g, st, onClick }: { g: Goal; st: ReturnType<typeof goalStatu
       <p className="big">{fmt(st.saved, g.currency)}</p>
       <p className="muted small">de {fmt(g.target, g.currency)}</p>
       <Progress ratio={st.ratio} good />
-      <p className="small">{st.done ? <span className="pos">¡Objetivo alcanzado!</span> : <>Faltan {fmt(st.left, g.currency)}</>}</p>
+      <p className="small">{st.done ? <span className="pos">¡Objetivo alcanzado!</span> : <>Faltan <b>{fmt(st.left, g.currency)}</b></>}</p>
       {!st.done && st.neededPerMonth ? (
         <p className="muted small">
           Para el {shortDate(g.targetDate!)}: {fmt(st.neededPerMonth, g.currency)} / mes
@@ -142,7 +142,7 @@ function GoalDetail({ s, goal, onBack }: { s: Store; goal: Goal; onBack: () => v
       </button>
       <div className="page-head">
         <h1>
-          {goal.icon} {goal.name}
+          {goal.name}
         </h1>
         <div className="row wrap">
           <button className="btn" onClick={() => setEdit(true)}>
@@ -227,7 +227,7 @@ function GoalDetail({ s, goal, onBack }: { s: Store; goal: Goal; onBack: () => v
             {st.contribs.map((c) => (
               <li key={c.id} className="row clickable" onClick={() => setContrib({ c })}>
                 <span className="grow">
-                  <span className="block">{shortDate(c.date)}</span>
+                  <span className="block tx-title">{shortDate(c.date)}</span>
                   {c.note && <span className="muted small">{c.note}</span>}
                 </span>
                 <span className={`tx-amount ${c.amount < 0 ? 'neg' : 'pos'}`}>{fmt(c.amount, goal.currency, { sign: true })}</span>
@@ -254,7 +254,7 @@ function GoalDetail({ s, goal, onBack }: { s: Store; goal: Goal; onBack: () => v
 
 function GoalForm({ s, goal, onClose }: { s: Store; goal?: Goal; onClose: (id?: string | null) => void }) {
   const [name, setName] = useState(goal?.name ?? '');
-  const [icon, setIcon] = useState(goal?.icon ?? '🎯');
+  const [icon, setIcon] = useState(goal?.icon ?? 'target');
   const [currency, setCurrency] = useState<Currency>(goal?.currency ?? s.main);
   const [target, setTarget] = useState(goal ? centsToInput(goal.target) : '');
   const [initial, setInitial] = useState('');
@@ -334,13 +334,7 @@ function GoalForm({ s, goal, onClose }: { s: Store; goal?: Goal; onClose: (id?: 
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej.: Fondo de emergencia" autoFocus={!goal} />
         </Field>
         <Field label="Ícono">
-          <div className="icon-pick">
-            {ICONS.map((i) => (
-              <button type="button" key={i} className={i === icon ? 'on' : ''} onClick={() => setIcon(i)}>
-                {i}
-              </button>
-            ))}
-          </div>
+          <GlyphPicker value={icon} onChange={setIcon} />
         </Field>
         <Field label="Moneda" hint={hasContribs ? 'No se puede cambiar porque ya tiene aportes.' : undefined}>
           <select value={currency} onChange={(e) => setCurrency(e.target.value as Currency)} disabled={hasContribs}>

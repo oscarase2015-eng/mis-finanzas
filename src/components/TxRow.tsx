@@ -2,6 +2,7 @@ import { catLabel, rootCat, type Store } from '../data';
 import type { Transaction } from '../db';
 import { shortDate } from '../dates';
 import { fmt } from '../money';
+import { Glyph } from './Icons';
 
 export default function TxRow({ s, tx, onClick, showDate, perspective }: { s: Store; tx: Transaction; onClick: () => void; showDate?: boolean; perspective?: string }) {
   const acc = s.accById.get(tx.accountId);
@@ -32,7 +33,7 @@ export default function TxRow({ s, tx, onClick, showDate, perspective }: { s: St
   return (
     <li className="row tx clickable" onClick={onClick}>
       <span className="tx-icon" style={{ background: tx.type === 'transferencia' ? 'var(--hover)' : `${root?.color ?? '#94a3b8'}22` }}>
-        {tx.type === 'transferencia' ? '⇄' : root?.icon ?? '•'}
+        <Glyph name={tx.type === 'transferencia' ? 'swap' : root?.icon} />
       </span>
       <span className="grow tx-text">
         <span className="tx-title">{title}</span>

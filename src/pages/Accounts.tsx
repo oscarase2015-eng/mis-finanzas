@@ -8,11 +8,11 @@ import { AmountInput, Empty, Field, Modal, RateWarning } from '../components/ui'
 import { ColorWheelModal, faceStyle } from '../components/ColorWheel';
 
 export const ACCOUNT_TYPES: { value: AccountType; label: string; icon: string }[] = [
-  { value: 'banco', label: 'Cuenta bancaria', icon: '🏦' },
-  { value: 'efectivo', label: 'Efectivo', icon: '💵' },
-  { value: 'tarjeta', label: 'Tarjeta de crédito', icon: '💳' },
-  { value: 'ahorro', label: 'Ahorro', icon: '🐷' },
-  { value: 'billetera', label: 'Billetera digital', icon: '📱' },
+  { value: 'banco', label: 'Cuenta bancaria', icon: 'bank' },
+  { value: 'efectivo', label: 'Efectivo', icon: 'cash' },
+  { value: 'tarjeta', label: 'Tarjeta de crédito', icon: 'card' },
+  { value: 'ahorro', label: 'Ahorro', icon: 'piggy' },
+  { value: 'billetera', label: 'Billetera digital', icon: 'phone' },
 ];
 
 export default function Accounts({ s, nav }: { s: Store; nav: Nav }) {

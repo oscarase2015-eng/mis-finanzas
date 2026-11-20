@@ -20,7 +20,7 @@ export function Modal({ title, onClose, children, footer }: { title: string; onC
         <header className="modal-head">
           <h2>{title}</h2>
           <button className="icon-btn" onClick={onClose} aria-label="Cerrar">
-            ✕
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
           </button>
         </header>
         <div className="modal-body">{children}</div>
@@ -57,7 +57,7 @@ export function CategorySelect({ s, kind, value, onChange, allowEmpty, onlyRoots
       {roots.map((r) => {
         const kids = onlyRoots ? [] : s.categories.filter((c) => c.parentId === r.id);
         return kids.length ? (
-          <optgroup key={r.id} label={`${r.icon} ${r.name}`}>
+          <optgroup key={r.id} label={r.name}>
             <option value={r.id}>{r.name} (general)</option>
             {kids.map((k) => (
               <option key={k.id} value={k.id}>
@@ -67,7 +67,7 @@ export function CategorySelect({ s, kind, value, onChange, allowEmpty, onlyRoots
           </optgroup>
         ) : (
           <option key={r.id} value={r.id}>
-            {r.icon} {r.name}
+            {r.name}
           </option>
         );
       })}

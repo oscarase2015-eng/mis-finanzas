@@ -4,6 +4,7 @@ import { save, softDelete, type Budget, type Currency } from '../db';
 import { monthOf, quincenaOf, shiftPeriod, today, type Period } from '../dates';
 import { centsToInput, convert, fmt, parseAmount } from '../money';
 import { AmountInput, CategorySelect, Empty, Field, Modal, Progress, RateWarning } from '../components/ui';
+import { Glyph } from '../components/Icons';
 
 /** Gasto de la categoría (y sus subcategorías) dentro del periodo, en la moneda del presupuesto */
 export function catBudgetSpent(s: Store, b: Budget, p: { start: string; end: string }) {
@@ -83,8 +84,9 @@ export default function Budgets({ s }: { s: Store }) {
                   {fmt(totalSpent, s.main)} de {fmt(totalBudget, s.main)}
                 </span>
               </span>
-              <span className={`small ${totalSpent > totalBudget ? 'neg' : 'pos'}`}>
-                {totalSpent > totalBudget ? `Excedido ${fmt(totalSpent - totalBudget, s.main)}` : `Quedan ${fmt(totalBudget - totalSpent, s.main)}`}
+              <span className="right-col">
+                <span className="muted small block">{totalSpent > totalBudget ? 'Excedido' : 'Quedan'}</span>
+                <b className={`key-amt ${totalSpent > totalBudget ? 'neg' : 'pos'}`}>{fmt(Math.abs(totalBudget - totalSpent), s.main)}</b>
               </span>
             </div>
             <Progress ratio={totalBudget ? totalSpent / totalBudget : 0} />
@@ -99,17 +101,18 @@ export default function Budgets({ s }: { s: Store }) {
                 <li key={b.id} className="card budget clickable" onClick={() => setEdit(b)}>
                   <div className="row">
                     <span className="tx-icon" style={{ background: `${c?.color ?? '#94a3b8'}22` }}>
-                      {c?.icon ?? '•'}
+                      <Glyph name={c?.icon} />
                     </span>
                     <span className="grow">
                       <strong>{c?.name ?? 'Categoría eliminada'}</strong>
                       <span className="muted small block">
-                        {fmt(spent, b.currency)} de {fmt(b.amount, b.currency)}
+                        Gastado {fmt(spent, b.currency)} de {fmt(b.amount, b.currency)}
                       </span>
                     </span>
-                    <span className={`small ${ratio >= 1 ? 'neg' : ratio >= 0.8 ? 'warn-text' : ''}`}>
-                      {ratio >= 1 ? `Excedido ${fmt(-left, b.currency)}` : `Quedan ${fmt(left, b.currency)}`}
-                      <span className="block muted">{Math.round(ratio * 100)} %</span>
+                    <span className="right-col">
+                      <span className="muted small block">{ratio >= 1 ? 'Excedido' : 'Quedan'}</span>
+                      <b className={`key-amt ${ratio >= 1 ? 'neg' : ratio >= 0.8 ? 'warn-text' : ''}`}>{fmt(ratio >= 1 ? -left : left, b.currency)}</b>
+                      <span className="block muted small">{Math.round(ratio * 100)} % usado</span>
                     </span>
                   </div>
                   <Progress ratio={ratio} />
@@ -130,7 +133,7 @@ export default function Budgets({ s }: { s: Store }) {
             {unbudgeted.map(([id, v]) => (
               <li key={id} className="row">
                 <span className="grow">{s.catById.get(id)?.name ?? 'Sin categoría'}</span>
-                <span>{fmt(v, s.main)}</span>
+                <b>{fmt(v, s.main)}</b>
               </li>
             ))}
           </ul>
