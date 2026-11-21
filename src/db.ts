@@ -139,6 +139,20 @@ export interface InboxItem extends Base {
   txId?: string | null;
 }
 
+/** Inversión o activo (terreno, casa, acciones...). Su valor suma al patrimonio. */
+export interface Investment extends Base {
+  name: string;
+  icon: string;
+  currency: Currency;
+  /** Valor actual en centavos */
+  value: number;
+  /** Fecha en que se fijó el valor */
+  valuedAt: string;
+  /** Deuda con la que se compró (la parte tuya = valor − lo que falta de la deuda) */
+  debtId?: string | null;
+  note: string;
+}
+
 export interface Setting {
   key: string;
   value: unknown;
@@ -158,6 +172,7 @@ export const db = new Dexie('mis-finanzas') as Dexie & {
   goals: EntityTable<Goal, 'id'>;
   goalContributions: EntityTable<GoalContribution, 'id'>;
   inbox: EntityTable<InboxItem, 'id'>;
+  investments: EntityTable<Investment, 'id'>;
 };
 
 db.version(1).stores({
@@ -180,6 +195,10 @@ db.version(3).stores({
   inbox: 'id, status, date, deleted, updatedAt',
 });
 
+db.version(4).stores({
+  investments: 'id, deleted, updatedAt',
+});
+
 export const uid = () =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()
@@ -191,7 +210,7 @@ export function stamp<T extends object>(obj: T): T & Base {
   return { ...obj, id: o.id || uid(), createdAt: now, updatedAt: now, deleted: 0 } as T & Base;
 }
 
-type Table = 'accounts' | 'categories' | 'transactions' | 'budgets' | 'rates' | 'debts' | 'debtPayments' | 'goals' | 'goalContributions' | 'inbox';
+type Table = 'accounts' | 'categories' | 'transactions' | 'budgets' | 'rates' | 'debts' | 'debtPayments' | 'goals' | 'goalContributions' | 'inbox' | 'investments';
 
 export async function save<T extends Base>(table: Table, obj: Partial<T> & { id?: string }) {
   const t = db[table] as unknown as EntityTable<Base, 'id'>;
@@ -219,5 +238,5 @@ export async function setSetting(key: string, value: unknown) {
 }
 
 /** Tablas que se sincronizan con la nube */
-export const SYNC_TABLES = ['accounts', 'categories', 'transactions', 'budgets', 'rates', 'settings', 'debts', 'debtPayments', 'goals', 'goalContributions', 'inbox'] as const;
+export const SYNC_TABLES = ['accounts', 'categories', 'transactions', 'budgets', 'rates', 'settings', 'debts', 'debtPayments', 'goals', 'goalContributions', 'inbox', 'investments'] as const;
 export type SyncTable = (typeof SYNC_TABLES)[number];

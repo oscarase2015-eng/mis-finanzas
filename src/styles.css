@@ -561,3 +561,4 @@ b, strong { font-weight: 500; }
 .debts-stats .stat:first-child { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); border-radius: var(--radius); }
 .debts-stats .stat:first-child .muted, .debts-stats .stat:first-child .neg { color: var(--accent-ink); }
 @media (max-width: 560px) { .debts-stats .stat:nth-child(2) { border-radius: var(--radius); } }
+.hero-debt strong { white-space: nowrap; }

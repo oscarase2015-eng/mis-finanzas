@@ -7,6 +7,7 @@ import Budgets from './pages/Budgets';
 import More from './pages/More';
 import Debts from './pages/Debts';
 import Goals from './pages/Goals';
+import Investments from './pages/Investments';
 import Inbox from './pages/Inbox';
 import Cards from './pages/Cards';
 import TxForm from './components/TxForm';
@@ -16,7 +17,7 @@ import { startCloud, supabase } from './cloud';
 import { LoginScreen, NewPasswordModal, syncLabel, useSyncState } from './components/Auth';
 import { remember } from './theme';
 
-export type Page = 'inicio' | 'movimientos' | 'cuentas' | 'presupuestos' | 'tarjetas' | 'deudas' | 'objetivos' | 'revisar' | 'mas';
+export type Page = 'inicio' | 'movimientos' | 'cuentas' | 'presupuestos' | 'tarjetas' | 'deudas' | 'objetivos' | 'inversiones' | 'revisar' | 'mas';
 
 const ICONS: Record<Page, string> = {
   inicio: 'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z',
@@ -27,6 +28,7 @@ const ICONS: Record<Page, string> = {
   revisar: 'M4 13l2-8h12l2 8M4 13v6h16v-6M4 13h5l1 2h4l1-2h5',
   deudas: 'M12 3v18M17 7.5c0-1.9-2.2-3-5-3s-5 1.1-5 3 2.2 2.8 5 3.5 5 1.6 5 3.5-2.2 3-5 3-5-1.1-5-3',
   objetivos: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 12h.01',
+  inversiones: 'M3 17l6-6 4 4 8-8M15 7h6v6',
   mas: 'M5 12h.01M12 12h.01M19 12h.01',
 };
 
@@ -45,6 +47,7 @@ const NAV: { id: Page; label: string }[] = [
   { id: 'revisar', label: 'Por revisar' },
   { id: 'deudas', label: 'Deudas' },
   { id: 'objetivos', label: 'Objetivos' },
+  { id: 'inversiones', label: 'Inversiones' },
   { id: 'mas', label: 'Más' },
 ];
 const BOTTOM: Page[] = ['inicio', 'movimientos', 'cuentas', 'presupuestos', 'mas'];
@@ -141,6 +144,7 @@ export default function App() {
         {route.page === 'revisar' && <Inbox s={store} />}
         {route.page === 'deudas' && <Debts s={store} />}
         {route.page === 'objetivos' && <Goals s={store} />}
+        {route.page === 'inversiones' && <Investments s={store} />}
         {route.page === 'mas' && (
           <More
             s={store}
@@ -159,7 +163,7 @@ export default function App() {
 
       <nav className="bottombar">
         {NAV.filter((n) => BOTTOM.includes(n.id)).map((n) => (
-          <button key={n.id} className={route.page === n.id || (n.id === 'mas' && (route.page === 'deudas' || route.page === 'objetivos' || route.page === 'revisar' || route.page === 'tarjetas')) ? 'active' : ''} onClick={() => nav.go(n.id)}>
+          <button key={n.id} className={route.page === n.id || (n.id === 'mas' && (route.page === 'deudas' || route.page === 'objetivos' || route.page === 'inversiones' || route.page === 'revisar' || route.page === 'tarjetas')) ? 'active' : ''} onClick={() => nav.go(n.id)}>
             <Icon id={n.id} />
             <span>{n.label}</span>
           </button>

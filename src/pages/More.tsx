@@ -12,7 +12,6 @@ import { AccountCard } from '../components/Auth';
 import { Glyph, GlyphPicker } from '../components/Icons';
 
 const SOON = [
-  ['trend', 'Inversiones'],
   ['repeat', 'Pagos recurrentes y recordatorios'],
   ['chart', 'Reportes y exportar a Excel'],
 ];
@@ -50,6 +49,13 @@ export default function More({ s, email, onLogin }: { s: Store; email: string | 
             <span className="muted small">{s.goals.length ? `${s.goals.filter((g) => !g.archived).length} activos` : 'Ahorra para tus metas'}</span>
           </span>
         </a>
+        <a className="card tile" href="#inversiones">
+          <span className="tile-icon"><Glyph name="trend" size={22} /></span>
+          <span>
+            <strong className="block">Inversiones</strong>
+            <span className="muted small">{s.investments.length ? `${s.investments.length} registradas` : 'Terrenos, casas, acciones'}</span>
+          </span>
+        </a>
       </div>
       <AccountCard email={email} onLogin={onLogin} />
       <RateCard s={s} />
@@ -67,7 +73,7 @@ export default function More({ s, email, onLogin }: { s: Store; email: string | 
           ))}
         </ul>
       </section>
-      <p className="muted small center">Mis Finanzas · versión 2.3.1</p>
+      <p className="muted small center">Mis Finanzas · versión 2.4</p>
     </div>
   );
 }
@@ -322,6 +328,7 @@ function BackupCard() {
       debtPayments: await db.debtPayments.toArray(),
       goals: await db.goals.toArray(),
       goalContributions: await db.goalContributions.toArray(),
+      investments: await db.investments.toArray(),
       exportedAt: new Date().toISOString(),
       accounts: await db.accounts.toArray(),
       categories: await db.categories.toArray(),
@@ -344,8 +351,8 @@ function BackupCard() {
       const data = JSON.parse(await f.text());
       if (data.app !== 'mis-finanzas') throw new Error('formato');
       if (!confirm('Esto reemplaza TODOS los datos de este dispositivo con los del respaldo. ¿Continuar?')) return;
-      await db.transaction('rw', [db.accounts, db.categories, db.transactions, db.budgets, db.rates, db.settings, db.debts, db.debtPayments, db.goals, db.goalContributions], async () => {
-        for (const t of ['accounts', 'categories', 'transactions', 'budgets', 'rates', 'settings', 'debts', 'debtPayments', 'goals', 'goalContributions'] as const) {
+      await db.transaction('rw', [db.accounts, db.categories, db.transactions, db.budgets, db.rates, db.settings, db.debts, db.debtPayments, db.goals, db.goalContributions, db.investments], async () => {
+        for (const t of ['accounts', 'categories', 'transactions', 'budgets', 'rates', 'settings', 'debts', 'debtPayments', 'goals', 'goalContributions', 'investments'] as const) {
           await db[t].clear();
           await (db[t] as unknown as { bulkAdd: (r: unknown[]) => Promise<unknown> }).bulkAdd(data[t] ?? []);
         }

@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, type Account, type Budget, type Category, type Currency, type Debt, type DebtPayment, type Goal, type GoalContribution, type InboxItem, type Rate, type Transaction } from './db';
+import { db, type Account, type Budget, type Category, type Currency, type Debt, type DebtPayment, type Goal, type GoalContribution, type InboxItem, type Investment, type Rate, type Transaction } from './db';
 import { convert } from './money';
 
 export interface Store {
@@ -19,12 +19,13 @@ export interface Store {
   goals: Goal[];
   goalContributions: GoalContribution[];
   inbox: InboxItem[];
+  investments: Investment[];
   merchantCats: Record<string, string>;
 }
 
 export function useStore(): Store {
   const data = useLiveQuery(async () => {
-    const [inbox, merchantS] = await Promise.all([db.inbox.where('status').equals('pendiente').toArray(), db.settings.get('merchantCats')]);
+    const [inbox, merchantS, investments] = await Promise.all([db.inbox.where('status').equals('pendiente').toArray(), db.settings.get('merchantCats'), db.investments.where('deleted').equals(0).toArray()]);
     const [debts, debtPayments, goals, goalContributions] = await Promise.all([
       db.debts.where('deleted').equals(0).toArray(),
       db.debtPayments.where('deleted').equals(0).toArray(),
@@ -39,7 +40,7 @@ export function useStore(): Store {
       db.rates.where('deleted').equals(0).toArray(),
       db.settings.get('mainCurrency'),
     ]);
-    return { accounts, categories, txs, budgets, rates, main: (mainS?.value as Currency) ?? 'HNL', debts, debtPayments, goals, goalContributions, inbox: inbox.filter((i) => !i.deleted), merchantCats: (merchantS?.value as Record<string, string>) ?? {} };
+    return { accounts, categories, txs, budgets, rates, main: (mainS?.value as Currency) ?? 'HNL', debts, debtPayments, goals, goalContributions, inbox: inbox.filter((i) => !i.deleted), investments, merchantCats: (merchantS?.value as Record<string, string>) ?? {} };
   }, []);
 
   const accounts = data?.accounts ?? [];
@@ -74,6 +75,7 @@ export function useStore(): Store {
     goals: (data?.goals ?? []).sort((a, b) => a.createdAt - b.createdAt),
     inbox: (data?.inbox ?? []).sort((a, b) => (a.date === b.date ? b.createdAt - a.createdAt : a.date < b.date ? 1 : -1)),
     merchantCats: data?.merchantCats ?? {},
+    investments: (data?.investments ?? []).sort((a, b) => a.name.localeCompare(b.name, 'es')),
     goalContributions: (data?.goalContributions ?? []).sort((a, b) => (a.date === b.date ? b.createdAt - a.createdAt : a.date < b.date ? 1 : -1)),
   };
 }
@@ -123,6 +125,25 @@ export function debtTotals(s: Store, to: Currency = s.main) {
     else owed += v;
   }
   return { owe, owed };
+}
+
+/** Valor, deuda pendiente y parte propia de una inversión (en su moneda) */
+export function investStatus(s: Store, inv: Investment) {
+  const debt = inv.debtId ? s.debts.find((d) => d.id === inv.debtId) : undefined;
+  const left = debt ? convert(debtStatus(s, debt).left, debt.currency, inv.currency, s.rate) ?? 0 : 0;
+  const own = inv.value - left;
+  return { debt, left, own, ratio: inv.value > 0 ? Math.max(0, Math.min(1, own / inv.value)) : 0 };
+}
+
+/** Total de inversiones en la moneda principal */
+export function investTotals(s: Store, to: Currency = s.main) {
+  let value = 0;
+  let own = 0;
+  for (const i of s.investments) {
+    value += convert(i.value, i.currency, to, s.rate) ?? 0;
+    own += convert(investStatus(s, i).own, i.currency, to, s.rate) ?? 0;
+  }
+  return { value, own };
 }
 
 /** Categoría raíz (padre) de una categoría */

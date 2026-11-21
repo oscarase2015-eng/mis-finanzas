@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { Nav } from '../App';
 import { catBudgetSpent } from './Budgets';
-import { debtStatus, debtTotals, expenseByRoot, goalStatus, netWorth, totals, type Store } from '../data';
+import { debtStatus, debtTotals, expenseByRoot, goalStatus, investTotals, netWorth, totals, type Store } from '../data';
 import { addMonths, monthLabel, monthOf, quincenaOf, shortDate, today, type Period } from '../dates';
 import { cardAlerts } from './Cards';
 
@@ -37,6 +37,7 @@ export default function Dashboard({ s, nav }: { s: Store; nav: Nav }) {
 
   const recent = s.txs.slice(0, 6);
   const dt = debtTotals(s);
+  const inv = investTotals(s);
   const debtRows = s.debts
     .map((d) => ({ d, st: debtStatus(s, d) }))
     .filter((r) => !r.st.done)
@@ -78,22 +79,26 @@ export default function Dashboard({ s, nav }: { s: Store; nav: Nav }) {
       <section className="card hero">
         <div>
           <span className="today-chip">{todayLabel()}</span>
-          <p className="muted" style={{ marginTop: 14 }}>Patrimonio total</p>
-          <p className="big">{fmt(nw.total, s.main)}</p>
-          <p className="muted small">
-            {fmt(nw.byCur.HNL, 'HNL')} en lempiras · {fmt(nw.byCur.USD, 'USD')} en dólares
-            {s.rate ? ` · tasa L ${s.rate.toFixed(4)}` : ''}
+          <p className="muted" style={{ marginTop: 14 }}>Patrimonio neto</p>
+          <p className="big">{fmt(nw.total + inv.value - dt.owe + dt.owed, s.main)}</p>
+          <p className="muted small hero-debt">
+            Cuentas <strong className="ink">{fmt(nw.total, s.main)}</strong>
+            {inv.value > 0 && (
+              <>
+                {' · '}Inversiones <strong className="ink">{fmt(inv.value, s.main)}</strong>
+              </>
+            )}
+            {dt.owe > 0 && (
+              <>
+                {' · '}Deudas <strong className="neg">−{fmt(dt.owe, s.main)}</strong>
+              </>
+            )}
+            {dt.owed > 0 && (
+              <>
+                {' · '}Te deben <strong className="ink">{fmt(dt.owed, s.main)}</strong>
+              </>
+            )}
           </p>
-          {(dt.owe > 0 || dt.owed > 0) && (
-            <p className="small hero-debt">
-              {dt.owe > 0 && (
-                <>
-                  Deudas pendientes: <strong className="neg">{fmt(dt.owe, s.main)}</strong> ·{' '}
-                </>
-              )}
-              Patrimonio neto: <strong>{fmt(nw.total - dt.owe + dt.owed, s.main)}</strong>
-            </p>
-          )}
         </div>
       </section>
 
