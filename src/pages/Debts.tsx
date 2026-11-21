@@ -4,6 +4,7 @@ import { save, softDelete, type Currency, type Debt, type DebtDirection, type De
 import { monthOf, shortDate, today } from '../dates';
 import { centsToInput, convert, fmt, parseAmount } from '../money';
 import { PALETTE } from '../seed';
+import { Glyph } from '../components/Icons';
 import { AccountSelect, AmountInput, Empty, Field, Modal, Progress, Segmented } from '../components/ui';
 
 export default function Debts({ s }: { s: Store }) {
@@ -45,7 +46,7 @@ export default function Debts({ s }: { s: Store }) {
         </Empty>
       ) : (
         <>
-          <div className="stats">
+          <div className="stats debts-stats">
             <div className="card stat">
               <p className="muted">Lo que debes</p>
               <p className="stat-v neg">{fmt(owe, s.main)}</p>
@@ -60,7 +61,7 @@ export default function Debts({ s }: { s: Store }) {
             </div>
           </div>
 
-          <div className="goal-grid">
+          <div className="budget-list">
             {active.map(({ d, st }) => (
               <DebtCard key={d.id} d={d} st={st} onClick={() => setOpenId(d.id)} />
             ))}
@@ -73,7 +74,7 @@ export default function Debts({ s }: { s: Store }) {
                 {showDone ? 'Ocultar' : 'Ver'} deudas pagadas ({done.length})
               </button>
               {showDone && (
-                <div className="goal-grid">
+                <div className="budget-list">
                   {done.map(({ d, st }) => (
                     <DebtCard key={d.id} d={d} st={st} onClick={() => setOpenId(d.id)} />
                   ))}
@@ -99,15 +100,24 @@ export default function Debts({ s }: { s: Store }) {
 }
 
 function DebtCard({ d, st, onClick }: { d: Debt; st: ReturnType<typeof debtStatus>; onClick: () => void }) {
+  const who = d.person ? `${d.direction === 'debo' ? 'A' : 'De'} ${d.person} · ` : '';
   return (
-    <div className="card goal clickable" onClick={onClick} style={{ borderTopColor: d.color }}>
+    <div className="card budget clickable" onClick={onClick}>
       <div className="row">
-        <strong className="grow">{d.name}</strong>
-        <span className={`badge ${d.direction === 'me_deben' ? 'badge-pos' : ''}`}>{d.direction === 'debo' ? 'Debo' : 'Me deben'}</span>
+        <span className="tx-icon">
+          <Glyph name={d.direction === 'debo' ? 'handshake' : 'inbox'} />
+        </span>
+        <span className="grow">
+          <strong>{d.name}</strong>
+          <span className="muted small block">
+            {who}Total {fmt(d.total, d.currency)}
+          </span>
+        </span>
+        <span className="right-col">
+          <b className={`key-amt ${st.done ? 'pos' : ''}`}>{st.done ? 'Pagada' : fmt(st.left, d.currency)}</b>
+          {!st.done && <span className="muted small block">{d.direction === 'debo' ? 'por pagar' : 'por cobrar'}</span>}
+        </span>
       </div>
-      {d.person && <p className="muted small">{d.direction === 'debo' ? 'A' : 'De'}: {d.person}</p>}
-      <p className={`big ${st.done ? 'pos' : ''}`}>{st.done ? 'Pagada' : fmt(st.left, d.currency)}</p>
-      <p className="muted small">{st.done ? `Total pagado ${fmt(st.paid, d.currency)}` : `falta de ${fmt(d.total, d.currency)}`}</p>
       <Progress ratio={st.ratio} good />
       {st.last && <p className="muted small">Último abono: {shortDate(st.last.date)}</p>}
     </div>

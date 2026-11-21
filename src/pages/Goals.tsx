@@ -69,7 +69,7 @@ export default function Goals({ s }: { s: Store }) {
               <p className="stat-v">{fmt(perMonth, s.main)} / mes</p>
             </div>
           </div>
-          <div className="goal-grid">
+          <div className="budget-list">
             {active.map(({ g, st }) => (
               <GoalCard key={g.id} g={g} st={st} onClick={() => setOpenId(g.id)} />
             ))}
@@ -80,7 +80,7 @@ export default function Goals({ s }: { s: Store }) {
                 {showArchived ? 'Ocultar' : 'Ver'} objetivos logrados ({archived.length})
               </button>
               {showArchived && (
-                <div className="goal-grid">
+                <div className="budget-list">
                   {archived.map(({ g, st }) => (
                     <GoalCard key={g.id} g={g} st={st} onClick={() => setOpenId(g.id)} />
                   ))}
@@ -106,17 +106,21 @@ export default function Goals({ s }: { s: Store }) {
 
 function GoalCard({ g, st, onClick }: { g: Goal; st: ReturnType<typeof goalStatus>; onClick: () => void }) {
   return (
-    <div className={`card goal clickable ${g.archived ? 'archived' : ''}`} onClick={onClick} style={{ borderTopColor: g.color }}>
+    <div className={`card budget clickable ${g.archived ? 'archived' : ''}`} onClick={onClick}>
       <div className="row">
-        <span className="tx-icon" style={{ background: `${g.color}22` }}>
+        <span className="tx-icon">
           <Glyph name={g.icon} />
         </span>
-        <strong className="grow">{g.name}</strong>
+        <span className="grow">
+          <strong>{g.name}</strong>
+          <span className="muted small block">Meta {fmt(g.target, g.currency)}</span>
+        </span>
+        <span className="right-col">
+          <b className={`key-amt ${st.done ? 'pos' : ''}`}>{fmt(st.saved, g.currency)}</b>
+          <span className="muted small block">{st.done ? '¡logrado!' : 'ahorrado'}</span>
+        </span>
       </div>
-      <p className="big">{fmt(st.saved, g.currency)}</p>
-      <p className="muted small">Meta {fmt(g.target, g.currency)}</p>
       <Progress ratio={st.ratio} good />
-      {st.done && <p className="small pos">¡Objetivo alcanzado!</p>}
       {!st.done && st.neededPerMonth ? (
         <p className="muted small">
           Para el {shortDate(g.targetDate!)}: {fmt(st.neededPerMonth, g.currency)} / mes

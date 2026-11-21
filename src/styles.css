@@ -547,3 +547,17 @@ h3, .field-label, .day-head, .facts dt, .stat > p.muted:first-child, .hero > div
 
 /* Negritas un poco más suaves */
 b, strong { font-weight: 500; }
+
+/* Deudas y objetivos con el mismo formato que presupuestos */
+.budget.archived { opacity: 0.6; }
+.progress-fill.goal-fill { --c: var(--text); }
+.budget-list > .budget { margin: 0; }
+.budget .muted.small:last-child { margin-top: 2px; }
+.stats .stat:nth-child(2) .pos { color: var(--accent-ink); }
+/* En Deudas el rojo va en "Lo que debes" */
+.debts-stats .stat:nth-child(2) { background: var(--surface); color: var(--text); border-color: var(--line); border-radius: 999px; }
+.debts-stats .stat:nth-child(2) .muted { color: var(--muted); }
+.debts-stats .stat:nth-child(2) .pos { color: var(--pos); }
+.debts-stats .stat:first-child { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); border-radius: var(--radius); }
+.debts-stats .stat:first-child .muted, .debts-stats .stat:first-child .neg { color: var(--accent-ink); }
+@media (max-width: 560px) { .debts-stats .stat:nth-child(2) { border-radius: var(--radius); } }
